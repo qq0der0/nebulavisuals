@@ -1,0 +1,12 @@
+# robots.txt для Nebula Visuals
+# Разрешаем поисковым роботам обход всего сайта.
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /profile.html?
+
+# Служебные и динамические страницы закрывать не нужно —
+# /profile.html полезна для поиска по запросам «Nebula Visuals профиль».
+
+# Карта сайта
+Sitemap: https://nebulavisuals-public.vercel.app/sitemap.xml

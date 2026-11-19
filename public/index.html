@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NebulaVisuals</title>
+<meta name="description" content="Nebula Visuals — бесплатный клиент Minecraft 1.21.4: визуальные улучшения, стабильный FPS, сервер в моде и онлайн-чат. Скачай лаунчер Nebula Visuals и играй на FunTime.">
+<meta name="keywords" content="Nebula Visuals, клиент Minecraft, Minecraft 1.21.4, скачать клиент Minecraft, Nebula Visuals лаунчер, клиент 1.21.4, FunTime, клиент для Minecraft, мод на Minecraft">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="Nebula Visuals">
+<meta name="theme-color" content="#07080d">
+<meta name="google-site-verification" content="ВСТАВЬТЕ_КОД_ИЗ_GOOGLE_SEARCH_CONSOLE">
+<meta name="yandex-verification" content="ВСТАВЬТЕ_КОД_ИЗ_ЯНДЕКС_ВЕБМАСТЕР">
+<link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+
+<!-- SEO -->
+<link rel="canonical" href="https://nebulavisuals-public.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nebulavisuals-public.vercel.app/">
+<meta property="og:title" content="NebulaVisuals">
+<meta property="og:description" content="Бесплатный клиент Minecraft 1.21.4: визуальные улучшения, стабильный FPS, сервер в моде и онлайн-чат. Скачай лаунчер Nebula Visuals.">
+<meta property="og:image" content="https://nebulavisuals-public.vercel.app/icon.png">
+<meta property="og:image:alt" content="Nebula Visuals — клиент Minecraft 1.21.4">
+<meta property="og:site_name" content="Nebula Visuals">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nebula Visuals — Клиент Minecraft 1.21.4">
+<meta name="twitter:description" content="Бесплатный клиент Minecraft 1.21.4: визуальные улучшения, стабильный FPS, сервер в моде и онлайн-чат.">
+<meta name="twitter:image" content="https://nebulavisuals-public.vercel.app/icon.png">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Nebula Visuals",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Windows 10/11",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB", "availability": "https://schema.org/InStock"},
+  "description": "Клиент Minecraft 1.21.4 с визуальными улучшениями, оптимизацией FPS и автоустановкой игры. Сервер в моде: поиск игроков, чат, друзья.",
+  "url": "https://nebulavisuals-public.vercel.app/",
+  "image": "https://nebulavisuals-public.vercel.app/icon.png",
+  "downloadUrl": "https://nebulavisuals-public.vercel.app/",
+  "softwareVersion": "2.1.7",
+  "inLanguage": "ru-RU",
+  "potentialAction": {
+    "@type": "DownloadAction",
+    "target": "https://nebulavisuals-public.vercel.app/"
+  }
+}
+</script>
+
+<style id="nebula-premium">
+:root {
+  --nv-glass: rgba(17, 18, 31, .78);
+  --nv-glass-strong: rgba(13, 14, 25, .94);
+  --nv-line: rgba(181, 151, 255, .17);
+  --nv-violet: #9b7bff;
+  --nv-blue: #69a8ff;
+  --nv-pink: #ff83bc;
+}
+html { scroll-behavior: smooth; background:#16122a; }
+/* Глубокий фиолетово-тёмный фон вместо чистого чёрного + мягкое свечение сверху */
+body {
+  position: relative;
+  z-index: 0;
+  background:
+    radial-gradient(1100px 480px at 50% -140px, rgba(139,109,255,.17), transparent 65%),
+    radial-gradient(900px 420px at 88% -80px, rgba(84,140,255,.08), transparent 60%),
+    linear-gradient(180deg, #17132b 0%, #121021 38%, #0f0d1a 100%);
+  background-color:#121021;
+  border-radius:26px 26px 0 0;
+  min-height:100vh;
+}
+::selection { background:rgba(153,111,255,.36); color:#fff; }
+
+/* Rounded floating header matching the reference capsule */
+header.nav {
+  position:fixed !important; top:8px !important; left:0; right:0;
+  z-index:100 !important; padding:0 6px !important;
+  background:transparent !important; border:0 !important; box-shadow:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+header.nav .nav-inner {
+  width:min(1300px, 100%) !important;
+  min-height:60px !important; margin:0 auto !important;
+  padding:7px 22px !important; border-radius:26px !important;
+  background:#1a1632 !important;
+  border:1px solid rgba(198,178,255,.12) !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+  display:flex !important; align-items:center !important; gap:22px !important;
+}
+header.nav .nav-links { flex:1 1 auto; justify-content:center !important; gap:clamp(10px,1.8vw,25px) !important; }
+header.nav .nav-links a { transition:color .2s ease, opacity .2s ease; white-space:nowrap; }
+header.nav .nav-links a:hover { color:#c6a8ff !important; }
+header.nav .nav-right { gap:10px !important; }
+header.nav .nav-support, header.nav .nav-tg, header.nav .nav-auth, header.nav .nav-profile-link {
+  border-radius:18px !important;
+}
+header.nav .nav-auth, header.nav .nav-profile-link {
+  min-height:40px !important; padding:0 15px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+}
+.hero { padding-top:clamp(115px, 14vh, 165px) !important; }
+.hero-inner { position:relative; z-index:1; }
+.section, .hero { isolation:isolate; }
+.cards, .server-grid, .chat-box, .comparison-slider, .video-wrapper, .file-download,
+.faq, .panel, .sidebar, .topbar {
+  border-radius:24px;
+}
+.cards > *, .server-grid > *, .faq > *, .server-card, .chat-rules-side, .chat-online, .chat-main {
+  border-radius:20px !important;
+}
+.btn, button, input, textarea, select { border-radius:14px; }
+.btn { transition:transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+.btn:hover { transform:translateY(-2px); filter:brightness(1.08); }
+.section-header { position:relative; }
+.section-tag { border-radius:999px; }
+.comparison-slider, .video-container { overflow:hidden; }
+
+/* Profile: dashboard with a glass sidebar, airy cards and consistent controls */
+body:has(.shell) { min-height:100vh; }
+.shell {
+  width:min(1440px, calc(100% - 42px)) !important;
+  margin:24px auto !important; gap:22px !important;
+  align-items:stretch !important;
+}
+.sidebar {
+  position:sticky; top:22px; align-self:flex-start;
+  min-height:calc(100vh - 44px);
+  padding:25px 18px !important; border-radius:28px !important;
+  background:linear-gradient(165deg, rgba(25,25,44,.94), rgba(12,13,24,.91)) !important;
+  border:1px solid var(--nv-line) !important;
+  box-shadow:0 18px 55px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05) !important;
+  backdrop-filter:blur(20px);
+}
+.sidebar-brand { padding:8px 10px 24px !important; }
+.sidebar-logo { border-radius:13px; box-shadow:0 0 24px rgba(151,111,255,.25); }
+.sidebar-user {
+  padding:18px 14px !important; margin:0 0 22px !important;
+  border-radius:20px !important; background:rgba(255,255,255,.045) !important;
+  border:1px solid rgba(255,255,255,.07) !important;
+}
+.avatar-wrap { border:0 !important; box-shadow:none !important; border-radius:50%; }
+.sidebar-nav { gap:8px !important; }
+.sidebar-nav .nav-item {
+  border-radius:14px !important; padding:13px 14px !important;
+  transition:background .2s ease, transform .2s ease;
+}
+.sidebar-nav .nav-item:hover { transform:translateX(3px); background:rgba(154,119,255,.12) !important; }
+.sidebar-nav .nav-item.active {
+  background:linear-gradient(110deg,rgba(111,131,255,.22),rgba(171,105,255,.18)) !important;
+  border:1px solid rgba(166,139,255,.2) !important;
+}
+.logout-btn { border-radius:14px !important; margin-top:18px; }
+.main { min-width:0; padding:12px 8px 40px !important; }
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px !important; margin-bottom:22px !important;
+  border-radius:22px !important; background:rgba(18,19,34,.66) !important;
+  border:1px solid rgba(181,151,255,.12) !important;
+  backdrop-filter:blur(16px);
+}
+.page-title { letter-spacing:-.035em; }
+.back-link { border-radius:999px !important; padding:10px 16px !important; background:rgba(255,255,255,.055); }
+.tab-content { gap:18px; }
+.panel {
+  padding:26px !important; margin-bottom:18px !important;
+  border-radius:22px !important;
+  background:linear-gradient(145deg,rgba(26,27,47,.88),rgba(15,16,29,.88)) !important;
+  border:1px solid rgba(174,146,255,.15) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.035) !important;
+}
+.panel-row { padding:16px 0 !important; border-bottom:1px solid rgba(255,255,255,.065); }
+.panel-row:last-of-type { border-bottom:0; }
+.panel-label { color:rgba(219,216,239,.62) !important; }
+.panel-value { color:#f4f1ff !important; }
+.panel-note, .panel-desc { line-height:1.65; color:rgba(218,216,236,.65) !important; }
+.panel-title { letter-spacing:-.02em; }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%; min-height:46px; padding:12px 14px !important;
+  color:#f5f2ff !important; background:rgba(5,7,17,.55) !important;
+  border:1px solid rgba(175,151,255,.2) !important; border-radius:13px !important;
+  outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+}
+.form-group input:focus { border-color:#9d82ff !important; box-shadow:0 0 0 3px rgba(157,130,255,.13); }
+.actions { margin:20px 0; }
+.hint, .form-msg { border-radius:13px; }
+.toast { border-radius:16px !important; }
+
+@media (max-width:850px) {
+  header.nav { padding:0 8px !important; }
+  header.nav .nav-inner { width:calc(100% - 8px) !important; gap:10px !important; padding:8px 12px !important; }
+  header.nav .nav-links { gap:9px !important; }
+  header.nav .nav-links a:nth-child(n+5) { display:none !important; }
+  .shell { width:calc(100% - 22px) !important; gap:12px !important; }
+  .sidebar { width:220px; }
+}
+@media (max-width:640px) {
+  header.nav { padding:0 8px !important; top:6px !important; }
+  header.nav .nav-inner { width:calc(100% - 10px) !important; min-height:52px !important; gap:8px !important; padding:6px 10px !important; border-radius:20px !important; }
+  header.nav .brand-name { font-size:15px !important; }
+  header.nav .brand-logo-icon { width:30px !important; height:30px !important; border-radius:9px !important; }
+  header.nav .nav-links { display:none !important; }
+  header.nav .nav-support { display:none !important; }
+  header.nav .nav-right { margin-left:auto; gap:8px !important; }
+  header.nav .nav-auth { height:34px !important; padding:0 13px !important; font-size:13px !important; }
+  header.nav .nav-tg { width:34px !important; height:34px !important; }
+  header.nav .nav-tg svg { width:26px !important; height:26px !important; }
+  .shell { display:block !important; width:calc(100% - 18px) !important; margin:12px auto !important; }
+  .sidebar { position:relative; top:auto; width:100% !important; min-height:0; margin-bottom:14px; }
+  .main { padding:0 0 28px !important; }
+  .topbar { padding:16px !important; }
+  .panel { padding:18px !important; }
+  .chat-box { grid-template-columns:1fr !important; gap:12px !important; }
+  .chat-rules-side, .chat-online { display:none; }
+}
+/* ===== Header fixes: alignment, brand, TG icon, login button ===== */
+.brand { flex:0 0 auto !important; min-width:0 !important; gap:12px !important; margin-left: clamp(8px, 3vw, 40px) !important; }
+.brand-name { white-space:nowrap !important; font-size:17px !important; }
+.nav-links { margin:0 auto !important; justify-content:center !important; align-items:center !important; }
+.nav-right { margin:0 !important; align-items:center !important; gap:10px !important; flex:0 0 auto !important; }
+.nav-tg {
+  width:40px !important; height:40px !important; border-radius:50% !important;
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  padding:0 !important; background:rgba(255,255,255,.04) !important; border:1px solid rgba(255,255,255,.08) !important;
+  transition:background .18s ease, border-color .18s ease !important;
+}
+.nav-tg:hover { background:rgba(255,255,255,.09) !important; border-color:rgba(120,200,250,.35) !important; }
+.nav-tg svg { display:block !important; }
+.nav-tg svg { width:20px !important; height:20px !important; display:block !important; }
+.nav-auth { height:38px !important; border-radius:999px !important; padding:0 18px !important; align-items:center !important; }
+header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 16px rgba(145,104,255,.3) !important; }
+
+/* На широких экранах меню строго по центру капсулы */
+@media (min-width:1300px) {
+  header.nav .brand { flex:1 1 0 !important; }
+  header.nav .nav-right { flex:1 1 0 !important; justify-content:flex-end !important; }
+  header.nav .nav-links { flex:0 0 auto !important; margin:0 !important; }
+}
+
+/* Планшеты: кнопки прижаты вправо, а не висят после логотипа */
+@media (max-width:900px) {
+  header.nav .nav-right { margin-left:auto !important; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+}
+
+/* ===== Mobile header: show every button (support, Telegram, login/profile) ===== */
+@media (max-width:640px) {
+  header.nav { padding:0 6px !important; top:6px !important; }
+  header.nav .nav-inner {
+    width:calc(100% - 8px) !important; min-height:52px !important;
+    gap:6px !important; padding:6px 8px !important; border-radius:18px !important;
+  }
+  header.nav .brand { gap:8px !important; }
+  header.nav .brand-name { font-size:13px !important; }
+  header.nav .brand-logo-icon { width:26px !important; height:26px !important; border-radius:8px !important; }
+  header.nav .nav-links { display:none !important; }
+  header.nav .nav-support {
+    display:inline-flex !important; width:42px !important; height:42px !important;
+    min-width:42px !important; padding:0 !important; justify-content:center !important;
+    border-radius:50% !important;
+    background: radial-gradient(circle at 40% 35%, rgba(255,150,175,.38), rgba(255,80,120,.20) 55%, rgba(255,77,102,.06) 100%) !important;
+    border: 1px solid rgba(255,125,155,.55) !important;
+    box-shadow: 0 0 16px rgba(255,110,140,.38), inset 0 0 10px rgba(255,150,175,.3) !important;
+  }
+  header.nav .nav-support-heart { width:24px !important; height:24px !important; }
+  header.nav .nav-support-text { display:none !important; }
+  header.nav .nav-right { margin-left:auto !important; gap:6px !important; }
+  header.nav .nav-auth { height:34px !important; padding:0 12px !important; font-size:12.5px !important; }
+  header.nav .nav-tg { width:34px !important; height:34px !important; }
+  header.nav .nav-tg svg { width:24px !important; height:24px !important; }
+  header.nav .nav-profile-link { min-height:34px !important; padding:3px 8px 3px 4px !important; gap:6px !important; }
+  header.nav .nav-profile-avatar { width:28px !important; height:28px !important; }
+  header.nav .nav-profile-name { display:inline !important; font-size:12px !important; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}
+</style>
+
+</head>
+<body>
+<!-- PARTICLES CANVAS -->
+<canvas id="particles" class="particles-canvas"></canvas>
+<div class="bg-photo" id="bgPhoto" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="Nebula Visuals — главная">
+      <span class="brand-name">NebulaVisuals</span>
+    </a>
+    <nav class="nav-links" id="nav-links">
+      <a href="#download">Скачать</a>
+      <a href="#features">Возможности</a>
+      <a href="#server">Сервер в моде</a>
+      <a href="#screens">Скриншоты</a>
+      <a href="#chat">Чат</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <!-- Right side: Support + Telegram + Auth/Profile -->
+    <div class="nav-right">
+      <a class="nav-support" href="https://funpay.com/users/16569412/" target="_blank" rel="noopener" aria-label="Поддержать автора на FunPay">
+        <svg class="nav-support-heart" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <defs>
+            <radialGradient id="heart-grad" cx="38%" cy="34%" r="78%">
+              <stop offset="0" stop-color="#ffd1da"/>
+              <stop offset=".45" stop-color="#ff7d9b"/>
+              <stop offset="1" stop-color="#e0345f"/>
+            </radialGradient>
+          </defs>
+          <path fill="url(#heart-grad)" d="M12 21s-7.6-4.9-10.1-10.3C.8 7.6 3.5 5 6.8 5c2.1 0 4 1.1 5.2 2.9C13.2 6.1 15.1 5 17.2 5c3.3 0 6 2.6 4.9 5.7C19.6 16.1 12 21 12 21z"/>
+        </svg>
+        <span class="nav-support-text">Поддержать автора</span>
+      </a>
+      <a class="nav-tg" href="https://t.me/Nebula_visual" target="_blank" rel="noopener" aria-label="Telegram канал">
+        <svg viewBox="0 0 32 32" width="30" height="30" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="tg-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#37aee2"/>
+              <stop offset="1" stop-color="#1e96c8"/>
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="15" fill="url(#tg-grad)"/>
+          <path d="M22.9 9.3l-2.6 12.4c-.2 1-.8 1.2-1.6 0.8l-4.4-3.2-2.1 2c-.2.2-.4.4-.9.4l.3-4.4 8-7.2c.35-.3-.1-.5-.54-.2l-9.9 6.2-4.3-1.3c-.93-.3-.9-.9.2-1.4l17.2-6.6c.8-.3 1.5.6 1.3 1.6z" fill="#ffffff"/>
+        </svg>
+      </a>
+      <!-- Auth button (shown when not logged in) -->
+      <button class="nav-auth" id="nav-auth-btn" aria-label="Войти или зарегистрироваться">
+        <span class="nav-auth-text">Войти</span>
+      </button>
+      <!-- Profile link (shown when logged in) — opens profile.html -->
+      <a class="nav-profile-link" id="nav-profile-link" href="/profile.html" aria-label="Профиль" style="display:none">
+        <span class="nav-profile-avatar" id="nav-profile-avatar">
+          <img src="/avatar-nebula.png" alt="" class="nav-avatar-img" id="nav-avatar-img">
+        </span>
+        <span class="nav-profile-name" id="nav-profile-name">Профиль</span>
+      </a>
+      <!-- Бургер для телефонов/планшетов -->
+      <button class="nav-burger" id="nav-burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav-mobile-menu">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<!-- Мобильное меню: все кнопки -->
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="#download">Скачать</a>
+  <a href="#features">Возможности</a>
+  <a href="#server">Сервер в моде</a>
+  <a href="#screens">Скриншоты</a>
+  <a href="#chat">Чат</a>
+  <a href="#faq">Вопросы</a>
+  <a class="nav-m-support" href="https://funpay.com/users/16569412/" target="_blank" rel="noopener">♥&nbsp;&nbsp;Поддержать автора</a>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-grid-glow"></div>
+    <div class="hero-inner">
+      <div class="hero-badge">Minecraft 1.21.4 · Fabric</div>
+      <h1 class="hero-title">
+        <span class="hero-title-line">Клиент</span>
+        <span class="hero-title-line gradient-text">Nebula Visuals</span>
+      </h1>
+      <p class="hero-sub">Визуальные эффекты, стабильный FPS и умная оптимизация. Один клик — лаунчер сам скачает игру и запустит её.</p>
+      <div class="hero-buttons">
+        <a class="btn btn-primary btn-lg js-smart-dl" id="download-btn" href="https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.7/Nebula.Visuals.Setup.2.1.7.exe" download rel="noopener">
+          <span class="btn-text">Скачать установщик</span>
+          <span class="btn-icon" aria-hidden="true">⬇</span>
+        </a>
+        <a class="btn btn-ghost btn-lg" href="#server">
+          <span class="btn-text">Сервер в моде</span>
+          <span class="btn-icon" aria-hidden="true">🌐</span>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-value">1.21.4</div><div class="stat-label">версия игры</div></div>
+        <div class="stat"><div class="stat-value">Fabric</div><div class="stat-label">загрузчик модов</div></div>
+        <div class="stat"><div class="stat-value" id="ingame-count">0</div><div class="stat-label">сейчас в игре</div></div>
+        <div class="stat"><div class="stat-value">0 ₽</div><div class="stat-label">бесплатно</div></div>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS COMPARISON (INTERACTIVE SLIDER) -->
+  <section class="section section-screens" id="screens">
+    <div class="section-header">
+      <div class="section-tag">Визуальное сравнение</div>
+      <h2 class="section-title">Без мода и с модом</h2>
+      <p class="section-sub">Перетащите ползунок, чтобы сравнить</p>
+    </div>
+    <div class="comparison-slider" id="comparison-slider">
+      <div class="slider-before">
+        <img src="/screen-with-mod.png" alt="Minecraft с Nebula Visuals" loading="lazy">
+      </div>
+      <div class="slider-after">
+        <img src="/screen-without-mod.png" alt="Minecraft без мода" loading="lazy">
+      </div>
+      <div class="slider-track"></div>
+      <div class="slider-handle" id="slider-handle" aria-label="Перетащите для сравнения" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
+        <div class="slider-dot"></div>
+        <div class="slider-hit-area"></div>
+      </div>
+    </div>
+    <div class="slider-labels">
+      <span class="label-before">С Nebula Visuals</span>
+      <span class="label-after">Без мода</span>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-header">
+      <div class="section-tag">Что умеет клиент</div>
+      <h2 class="section-title">Возможности Nebula Visuals</h2>
+      <p class="section-sub">Всё необходимое для комфортной игры в одном клиенте</p>
+    </div>
+    <div class="cards" id="features-cards"></div>
+  </section>
+
+  <!-- SERVER IN MOD -->
+  <section class="section section-server" id="server">
+    <div class="section-header">
+      <div class="section-tag">Сервер в моде</div>
+      <h2 class="section-title">Сервер в моде</h2>
+    </div>
+    <div class="server-grid">
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Поиск игроков</h3>
+          <p>Находи других игроков Nebula Visuals по нику, статусу или режиму игры.</p>
+        </div>
+      </div>
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Чат и сообщения</h3>
+          <p>Личные сообщения, групповые чаты, история переписки — всё внутри клиента.</p>
+        </div>
+      </div>
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Друзья и группы</h3>
+          <p>Добавляй в друзья, создавай группы для совместной игры, види онлайн-статус.</p>
+        </div>
+      </div>
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Уведомления</h3>
+          <p>Мгновенные пуши о новых сообщениях, приглашениях в игру, обновлениях мода.</p>
+        </div>
+      </div>
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Голосовой чат</h3>
+          <p>Встроенный голосовой чат с низкой задержкой — общайся голосом в игре.</p>
+        </div>
+      </div>
+      <div class="server-card">
+        <div class="server-card-content">
+          <h3>Приватность</h3>
+          <p>Гибкие настройки: кто может писать, видеть твой статус, приглашать в игру.</p>
+        </div>
+      </div>
+    </div>
+    <div class="server-connect">
+      <a class="btn btn-primary btn-lg" href="https://t.me/Nebula_visual" target="_blank" rel="noopener">
+        <svg viewBox="0 0 32 32" width="28" height="28" role="img" aria-hidden="true" style="display:block">
+          <defs>
+            <linearGradient id="tg-grad-btn" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#37aee2"/>
+              <stop offset="1" stop-color="#1e96c8"/>
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="15" fill="url(#tg-grad-btn)"/>
+          <path d="M22.9 9.3l-2.6 12.4c-.2 1-.8 1.2-1.6 0.8l-4.4-3.2-2.1 2c-.2.2-.4.4-.9.4l.3-4.4 8-7.2c.35-.3-.1-.5-.54-.2l-9.9 6.2-4.3-1.3c-.93-.3-.9-.9.2-1.4l17.2-6.6c.8-.3 1.5.6 1.3 1.6z" fill="#ffffff"/>
+        </svg>
+        <span class="btn-text">Telegram канал</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- VIDEO REVIEW -->
+  <section class="section section-video" id="video-review">
+    <div class="section-header">
+      <div class="section-tag">Видео</div>
+      <h2 class="section-title">Обзор на Nebula Visuals</h2>
+    </div>
+    <div class="video-wrapper">
+      <div class="video-container">
+        <iframe 
+          src="https://www.youtube.com/embed/Gp-DQuTmuRQ" 
+          title="Обзор на Nebula Visuals" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div class="video-caption">Обзор на Nebula Visuals</div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="section-header">
+      <div class="section-tag">Частые вопросы</div>
+      <h2 class="section-title">Вопросы и ответы</h2>
+    </div>
+    <div class="faq" id="faq-list"></div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="section section-chat" id="chat">
+
+
+    <div class="section-header">
+      <div class="section-tag">Чат</div>
+      <h2 class="section-title">Онлайн-чат Nebula Visuals</h2>
+      <p class="section-sub">Общайся с игроками — ники подсвечиваются по роли</p>
+      <div class="chat-status" id="chat-status"><span class="chat-status-dot"></span><span id="chat-status-text">подключение...</span></div>
+    </div>
+    <div class="chat-box">
+      
+      
+      
+      
+      
+      
+      <aside class="chat-rules-side" id="chat-rules">
+        <div class="chat-rules-head">
+          <img src="/bot-avatar.jpg" alt="" class="chat-rules-avatar">
+          <div>
+            <div class="chat-rules-name">FilterBotByqqc0d</div>
+            <div class="chat-rules-role">бот-модератор</div>
+          </div>
+        </div>
+        <h3>Правила чата</h3>
+        <ol class="chat-rules-list">
+          <li>Оскорбление родителей — <b>мут 3 часа</b></li>
+          <li>Реклама читов — <b>мут 1 день</b></li>
+          <li>Спам — <b>мут 1 час</b></li>
+          <li>18+ контент — <b>мут 3 дня</b></li>
+          <li>Админам можно всё, кроме правил 1, 2 и 4</li>
+        </ol>
+      </aside>
+      <div class="chat-main">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-offline-hint" id="chat-offline-hint" hidden>
+          Чат временно недоступен — нет связи с сервером сообщений. Подключение восстановится автоматически.
+        </div>
+        <div class="chat-mute-notice" id="chat-mute-notice" hidden>
+          <div class="chat-mute-title" id="chat-mute-title">Вы были замучены</div>
+          <div class="chat-mute-text" id="chat-mute-text"></div>
+        </div>
+        <div class="chat-mute-badge" id="chat-mute-badge" hidden>
+          <span class="chat-mute-badge-dot"></span>
+          <span id="chat-mute-badge-text">У вас мут</span>
+        </div>
+        <div class="chat-input-row" id="chat-input-row">
+          <span class="chat-me" id="chat-me">
+            <img src="/avatar-nebula.png" alt="" class="chat-me-avatar" id="chat-me-avatar">
+            <span class="chat-me-nick" id="chat-me-nick">—</span>
+          </span>
+          <input type="text" id="chat-text" placeholder="Напиши сообщение..." maxlength="300" autocomplete="off">
+          <button class="btn btn-primary" id="chat-send">Отправить</button>
+        </div>
+        <div class="chat-login-hint" id="chat-login-hint" hidden>
+          <button type="button" class="modal-switch-btn" id="chat-login-btn">Войдите</button>, чтобы писать в чат
+        </div>
+        <div class="form-msg" id="chat-msg"></div>
+      </div>
+      <aside class="chat-online">
+        <h3>Онлайн <span id="online-count" class="online-count">0</span></h3>
+        <ul class="online-list" id="online-list"></ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section class="section" id="download">
+    <div class="section-header">
+      <div class="section-tag">Скачать</div>
+      <h2 class="section-title">Установи Nebula Visuals</h2>
+      <p class="section-sub">Один файл — лаунчер сам скачает игру и запустит её. Бесплатно.</p>
+    </div>
+    <div class="file-download">
+      <a class="btn btn-primary btn-lg js-smart-dl" href="https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.7/Nebula.Visuals.Setup.2.1.7.exe" download rel="noopener">
+        <span class="btn-text">Скачать установщик</span>
+        <span class="btn-icon" aria-hidden="true">⬇</span>
+      </a>
+      
+      <p class="section-sub" style="margin-top:12px;font-size:13px;opacity:.7;">Windows · ~238 МБ · версия 2.1.7</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-title">NebulaVisuals</span>
+    </div>
+    <p class="footer-copy">© <span id="year"></span> NebulaVisuals</p>
+    <p class="footer-note">Не связан с Mojang / Microsoft</p>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-backdrop" id="auth-modal" hidden role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+  <div class="modal modal-wide">
+    <button class="modal-close" id="auth-modal-close" aria-label="Закрыть">×</button>
+    
+    <!-- LOGIN TAB -->
+    <div id="auth-login-tab" class="auth-tab active" role="tabpanel" aria-labelledby="auth-login-title">
+      <h3 id="auth-login-title">Вход в аккаунт</h3>
+      <form id="login-form" class="auth-form-inner">
+        <div class="form-group">
+          <label for="modal-login-username">Ник или Email</label>
+          <input type="text" id="modal-login-username" name="login" placeholder="Введите ник или email" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="modal-login-password">Пароль</label>
+          <input type="password" id="modal-login-password" name="password" placeholder="Введите пароль" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label for="modal-login-hwid">HWID устройства <span class="label-hint">(привяжется после первого запуска через лаунчер)</span></label>
+          <input type="text" id="modal-login-hwid" name="hwid" placeholder="Появится после первого запуска игры через лаунчер" maxlength="64" autocomplete="off" readonly>
+        </div>
+        <div class="form-group">
+          <label for="modal-login-code">Код доступа <span class="label-hint">(если аккаунт защищён кодом)</span></label>
+          <input type="text" id="modal-login-code" name="code" placeholder="Оставьте пустым, если код не требуется" maxlength="32" autocomplete="off">
+        </div>
+        <div class="form-row remember-row">
+          <label class="switch-label">
+            <input type="checkbox" id="modal-remember" name="remember" class="switch-input">
+            <span class="switch-track"><span class="switch-knob"></span></span>
+            <span>Запомнить меня</span>
+          </label>
+        </div>
+        <div class="form-error" id="modal-auth-error"></div>
+        <div class="form-ok" id="modal-auth-ok"></div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="modal-login-submit">Войти</button>
+        <p class="modal-switch">Нет аккаунта? <button type="button" class="modal-switch-btn" id="switch-to-register">Зарегистрироваться</button></p>
+      </form>
+    </div>
+    
+    <!-- REGISTER TAB -->
+    <div id="auth-register-tab" class="auth-tab" hidden role="tabpanel" aria-labelledby="auth-register-title">
+      <h3 id="auth-register-title">Регистрация</h3>
+      <form id="register-form" class="auth-form-inner">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-reg-username">Ник</label>
+            <input type="text" id="modal-reg-username" name="username" placeholder="Например: qqc0d" minlength="3" maxlength="16" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="modal-reg-email">Email</label>
+            <input type="email" id="modal-reg-email" name="email" placeholder="mail@example.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-reg-password">Пароль</label>
+            <input type="password" id="modal-reg-password" name="password" placeholder="Минимум 6 символов" minlength="6" required autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="modal-reg-password-confirm">Подтвердите пароль</label>
+            <input type="password" id="modal-reg-password-confirm" name="password_confirm" placeholder="Повторите пароль" minlength="6" required autocomplete="new-password">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="modal-reg-hwid">HWID устройства <span class="label-hint">(привяжется после первого запуска через лаунчер)</span></label>
+          <input type="text" id="modal-reg-hwid" name="hwid" placeholder="Появится после первого запуска игры через лаунчер" maxlength="64" autocomplete="off" readonly>
+        </div>
+        <div class="form-error" id="modal-register-error"></div>
+        <div class="form-ok" id="modal-register-ok"></div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="modal-register-submit">Зарегистрироваться</button>
+        <p class="modal-switch">Уже есть аккаунт? <button type="button" class="modal-switch-btn" id="switch-to-login">Войти</button></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" hidden aria-live="polite" aria-atomic="true"></div>
+
+<script src="/chat-backend.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NebulaVisuals — Профиль</title>
+<meta name="description" content="Личный кабинет Nebula Visuals: профиль игрока, привязка устройства и код доступа к лаунчеру.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://nebulavisuals-public.vercel.app/profile.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nebulavisuals-public.vercel.app/profile.html">
+<meta property="og:title" content="Профиль — Nebula Visuals">
+<meta property="og:description" content="Личный кабинет Nebula Visuals: профиль игрока, привязка устройства и код доступа к лаунчеру.">
+<meta property="og:site_name" content="Nebula Visuals">
+<meta property="og:locale" content="ru_RU">
+<meta name="theme-color" content="#07080d">
+<link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="/profile.css">
+
+<style id="nebula-premium">
+:root {
+  --nv-glass: rgba(17, 18, 31, .78);
+  --nv-glass-strong: rgba(13, 14, 25, .94);
+  --nv-line: rgba(181, 151, 255, .17);
+  --nv-violet: #9b7bff;
+  --nv-blue: #69a8ff;
+  --nv-pink: #ff83bc;
+}
+html { scroll-behavior: smooth; }
+body { position: relative; z-index: 0; background-color:#0d0d12; }
+::selection { background:rgba(153,111,255,.36); color:#fff; }
+
+/* Rounded floating header matching the reference capsule */
+header.nav {
+  position:fixed !important; top:8px !important; left:0; right:0;
+  z-index:100 !important; padding:0 6px !important;
+  background:transparent !important; border:0 !important; box-shadow:none !important;
+}
+header.nav .nav-inner {
+  width:min(1680px, 100%) !important;
+  min-height:60px !important; margin:0 auto !important;
+  padding:7px 22px !important; border-radius:26px !important;
+  background:#14141a !important;
+  border:1px solid rgba(255,255,255,.07) !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+  display:flex !important; align-items:center !important; gap:22px !important;
+}
+header.nav .nav-links { flex:1 1 auto; justify-content:center !important; gap:clamp(10px,1.8vw,25px) !important; }
+header.nav .nav-links a { transition:color .2s ease, opacity .2s ease; white-space:nowrap; }
+header.nav .nav-links a:hover { color:#c6a8ff !important; }
+header.nav .nav-right { gap:10px !important; }
+header.nav .nav-support, header.nav .nav-tg, header.nav .nav-auth, header.nav .nav-profile-link {
+  border-radius:18px !important;
+}
+header.nav .nav-auth, header.nav .nav-profile-link {
+  min-height:40px !important; padding:0 15px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+}
+.hero { padding-top:clamp(115px, 14vh, 165px) !important; }
+.hero-inner { position:relative; z-index:1; }
+.section, .hero { isolation:isolate; }
+.cards, .server-grid, .chat-box, .comparison-slider, .video-wrapper, .file-download,
+.faq, .panel, .sidebar, .topbar {
+  border-radius:24px;
+}
+.cards > *, .server-grid > *, .faq > *, .server-card, .chat-rules-side, .chat-online, .chat-main {
+  border-radius:20px !important;
+}
+.btn, button, input, textarea, select { border-radius:14px; }
+.btn { transition:transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+.btn:hover { transform:translateY(-2px); filter:brightness(1.08); }
+.section-header { position:relative; }
+.section-tag { border-radius:999px; }
+.comparison-slider, .video-container { overflow:hidden; }
+
+/* Profile: dashboard with a glass sidebar, airy cards and consistent controls */
+body:has(.shell) { min-height:100vh; }
+.shell {
+  width:min(1440px, calc(100% - 42px)) !important;
+  margin:24px auto !important; gap:22px !important;
+  align-items:stretch !important;
+}
+.sidebar {
+  position:sticky; top:22px; align-self:flex-start;
+  min-height:calc(100vh - 44px);
+  padding:25px 18px !important; border-radius:28px !important;
+  background:linear-gradient(165deg, rgba(25,25,44,.94), rgba(12,13,24,.91)) !important;
+  border:1px solid var(--nv-line) !important;
+  box-shadow:0 18px 55px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05) !important;
+  backdrop-filter:blur(20px);
+}
+.sidebar-brand { padding:8px 10px 24px !important; }
+.sidebar-logo { border-radius:13px; box-shadow:0 0 24px rgba(151,111,255,.25); }
+.sidebar-user {
+  padding:18px 14px !important; margin:0 0 22px !important;
+  border-radius:20px !important; background:rgba(255,255,255,.045) !important;
+  border:1px solid rgba(255,255,255,.07) !important;
+}
+.avatar-wrap { border:0 !important; box-shadow:none !important; border-radius:50%; }
+.sidebar-nav { gap:8px !important; }
+.sidebar-nav .nav-item {
+  border-radius:14px !important; padding:13px 14px !important;
+  transition:background .2s ease, transform .2s ease;
+}
+.sidebar-nav .nav-item:hover { transform:translateX(3px); background:rgba(154,119,255,.12) !important; }
+.sidebar-nav .nav-item.active {
+  background:linear-gradient(110deg,rgba(111,131,255,.22),rgba(171,105,255,.18)) !important;
+  border:1px solid rgba(166,139,255,.2) !important;
+}
+.logout-btn { border-radius:14px !important; margin-top:18px; }
+.main { min-width:0; padding:12px 8px 40px !important; }
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px !important; margin-bottom:22px !important;
+  border-radius:22px !important; background:rgba(18,19,34,.66) !important;
+  border:1px solid rgba(181,151,255,.12) !important;
+  backdrop-filter:blur(16px);
+}
+.page-title { letter-spacing:-.035em; }
+.back-link { border-radius:999px !important; padding:10px 16px !important; background:rgba(255,255,255,.055); }
+.tab-content { gap:18px; }
+.panel {
+  padding:26px !important; margin-bottom:18px !important;
+  border-radius:22px !important;
+  background:linear-gradient(145deg,rgba(26,27,47,.88),rgba(15,16,29,.88)) !important;
+  border:1px solid rgba(174,146,255,.15) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.035) !important;
+}
+.panel-row { padding:16px 0 !important; border-bottom:1px solid rgba(255,255,255,.065); }
+.panel-row:last-of-type { border-bottom:0; }
+.panel-label { color:rgba(219,216,239,.62) !important; }
+.panel-value { color:#f4f1ff !important; }
+.panel-note, .panel-desc { line-height:1.65; color:rgba(218,216,236,.65) !important; }
+.panel-title { letter-spacing:-.02em; }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%; min-height:46px; padding:12px 14px !important;
+  color:#f5f2ff !important; background:rgba(5,7,17,.55) !important;
+  border:1px solid rgba(175,151,255,.2) !important; border-radius:13px !important;
+  outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+}
+.form-group input:focus { border-color:#9d82ff !important; box-shadow:0 0 0 3px rgba(157,130,255,.13); }
+.actions { margin:20px 0; }
+.hint, .form-msg { border-radius:13px; }
+.toast { border-radius:16px !important; }
+
+@media (max-width:850px) {
+  header.nav { padding:0 8px !important; }
+  header.nav .nav-inner { width:calc(100% - 8px) !important; gap:10px !important; padding:8px 12px !important; }
+  header.nav .nav-links { gap:9px !important; }
+  header.nav .nav-links a:nth-child(n+5) { display:none !important; }
+  .shell { width:calc(100% - 22px) !important; gap:12px !important; }
+  .sidebar { width:220px; }
+}
+@media (max-width:640px) {
+  header.nav .nav-links { display:none !important; }
+  header.nav .nav-right { margin-left:auto; }
+  .shell { display:block !important; width:calc(100% - 18px) !important; margin:12px auto !important; }
+  .sidebar { position:relative; top:auto; width:100% !important; min-height:0; margin-bottom:14px; }
+  .main { padding:0 0 28px !important; }
+  .topbar { padding:16px !important; }
+  .panel { padding:18px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+}
+</style>
+
+</head>
+<body>
+<!-- PARTICLES CANVAS -->
+<canvas id="particles" class="particles-canvas"></canvas>
+<div class="bg-photo" id="bgPhoto" aria-hidden="true"></div>
+
+<div class="shell">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span>NebulaVisuals</span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar-wrap" id="avatar-wrap" title="Нажмите, чтобы сменить аватар">
+        <img src="/avatar-nebula.png" alt="Аватар" class="avatar-img" id="avatar-img">
+        <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/webp" hidden>
+        <div class="avatar-edit">✎</div>
+      </div>
+      <div class="user-meta">
+        <div class="user-name" id="user-name">—</div>
+        <div class="user-email" id="user-email">—</div>
+        <div class="user-role" id="user-role">
+          <img src="/role-user.svg" alt="" class="role-icon" id="role-icon">
+          <span id="user-status">Пользователь</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="home">
+        <img src="/home.svg" alt="" class="nav-icon-img">
+        <span>Главная</span>
+      </button>
+      <button class="nav-item" data-tab="security">
+        <img src="/security.svg" alt="" class="nav-icon-img">
+        <span>Безопасность</span>
+      </button>
+    </nav>
+
+    <button class="logout-btn" id="logout-btn">
+      <img src="/exit.svg" alt="" class="nav-icon-img">
+      <span>Выйти</span>
+    </button>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <div class="topbar">
+      <h1 class="page-title" id="page-title">Главная</h1>
+      <a class="back-link" href="/index.html">← На сайт</a>
+    </div>
+
+    <!-- HOME TAB -->
+    <section class="tab-content active" id="tab-home">
+      <div class="panel">
+        <div class="panel-row">
+          <span class="panel-label">Ник</span>
+          <span class="panel-value" id="nick-value">—</span>
+        </div>
+        <div class="panel-note">Ник изменить нельзя — он привязан к аккаунту навсегда</div>
+        <div class="panel-row">
+          <span class="panel-label">Почта</span>
+          <span class="panel-value" id="email-value">—</span>
+        </div>
+        <div class="panel-row">
+          <span class="panel-label">Идентификатор устройства (HWID)</span>
+          <span class="panel-value mono" id="hwid-value">—</span>
+        </div>
+        <div class="panel-row">
+          <span class="panel-label">Роль</span>
+          <span class="panel-value" id="role-value">Пользователь</span>
+        </div>
+        <div class="panel-note" id="hwid-note">HWID появляется после первого запуска игры через лаунчер — у каждого компьютера свой, и привязывается к аккаунту автоматически. Привязывать вручную не нужно.</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary btn-lg" id="download-btn">
+          <img src="/download.svg" alt="" class="btn-icon-img">
+          <span class="btn-text">Скачать файл</span>
+        </button>
+        
+      </div>
+
+      <div class="hint" id="profile-hint"></div>
+    </section>
+
+    <!-- SECURITY TAB -->
+    <section class="tab-content" id="tab-security">
+      <div class="panel">
+        <h3 class="panel-title">Привязка к устройству (HWID)</h3>
+        <p class="panel-desc">HWID считается лаунчером на каждом компьютере свой — он появляется после первого запуска игры и привязывается к аккаунту автоматически. Вход в лаунчер работает только с привязанного устройства.</p>
+        <div class="form-group">
+          <label for="hwid-input">HWID устройства</label>
+          <input type="text" id="hwid-input" placeholder="Появится после первого запуска игры через лаунчер" maxlength="64" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" id="save-hwid">Привязать устройство</button>
+        <button class="btn btn-danger" id="reset-hwid">Сбросить привязку HWID</button>
+        <div class="form-msg" id="hwid-msg"></div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">Код доступа к лаунчеру</h3>
+        <p class="panel-desc">Если код задан, его нужно ввести при входе в лаунчер. Пустое поле — код не требуется.</p>
+        <div class="form-group">
+          <label for="code-input">Код доступа</label>
+          <input type="text" id="code-input" placeholder="Например: 4821" maxlength="32" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" id="save-code">Сохранить код</button>
+        <button class="btn btn-danger" id="clear-code">Убрать код</button>
+        <div class="form-msg" id="code-msg"></div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">Сменить пароль</h3>
+        <div class="form-group">
+          <label for="cur-pass">Текущий пароль</label>
+          <input type="password" id="cur-pass" placeholder="Текущий пароль" autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label for="new-pass">Новый пароль</label>
+          <input type="password" id="new-pass" placeholder="Минимум 6 символов" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="conf-pass">Подтвердите пароль</label>
+          <input type="password" id="conf-pass" placeholder="Повторите пароль" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" id="save-pass">Сохранить пароль</button>
+        <div class="form-msg" id="pass-msg"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/chat-backend.js"></script>
+<script src="/profile.js"></script>
+</body>
+</html>
