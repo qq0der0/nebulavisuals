@@ -6,6 +6,7 @@ try { blob = require('@vercel/blob'); } catch (e) { blob = null; }
 const TOKEN = process.env.QUESTION_BOT_TOKEN || '';
 const SECRET = process.env.QUESTION_WEBHOOK_SECRET || '';
 const ADMIN = process.env.QUESTION_ADMIN_CHAT || '';
+const PASSWORD = process.env.QUESTION_PASSWORD || 'qqc0dAdmin1337';
 const BLOB_PATH = 'nebula/question-state.json';
 const seen = new Set();
 const rate = new Map();
@@ -33,7 +34,7 @@ async function load() {
       if (res && res.stream) return JSON.parse(await new Response(res.stream).text());
     }
   } catch (e) {}
-  return { tickets: {}, next: 1, adminChat: '' };
+  return { tickets: {}, next: 1, adminChat: '', auth: {}, pending: {} };
 }
 async function save(s) {
   try {
@@ -63,6 +64,29 @@ module.exports = async (req, res) => {
   const chat = String((msg.chat && msg.chat.id) || '');
   if (!chat || blocked(chat)) return res.status(200).json({ ok: true });
   const s = await load();
+  s.auth = s.auth || {};
+  s.pending = s.pending || {};
+
+  // Пароль при первом входе
+  const authed = !!s.auth[chat];
+  if (!authed) {
+    const text = String(msg.text || '').trim();
+    if (text === PASSWORD) {
+      s.auth[chat] = true;
+      s.pending[chat] = false;
+      s.adminChat = chat;
+      await save(s);
+      await tg(TOKEN, 'sendMessage', { chat_id: chat,
+        text: 'Пароль принят. Этот бот только для вас. Все вопросы из @paynebulabot приходят сюда. Чтобы ответить — нажмите «Ответить» на сообщение с тикетом.' });
+      return res.status(200).json({ ok: true, auth: true });
+    }
+    if (!s.pending[chat]) {
+      s.pending[chat] = true;
+      await save(s);
+    }
+    await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Введите пароль' });
+    return res.status(200).json({ ok: true, needPassword: true });
+  }
 
   // Личный ящик: все вопросы приходят сюда из @paynebulabot.
   const OWNER = String(ADMIN || process.env.ADMIN_CHAT_ID || s.adminChat || '');
@@ -80,6 +104,9 @@ module.exports = async (req, res) => {
       } else {
         await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Тикет #Q' + replyId + ' не найден.' });
       }
+    }
+    if (msg.text && msg.text.length > 2) {
+      await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Вопрос принят. Ответьте на него, чтобы отправить ответ человеку.' });
     }
     return res.status(200).json({ ok: true });
   }

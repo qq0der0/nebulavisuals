@@ -134,18 +134,14 @@
     var html = '';
     var u = currentUser();
     if (String(u.username || '').toLowerCase() === 'qqc0d') {
-      html = '<span class="sub-badge">⭐ Фулл + навсегда By qqc0d</span>' +
-        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Подписка активна</div>';
+      html = '<div style="color:#f0f2fa;font-size:15px;font-weight:700">Подписка: Фулл + навсегда By qqc0d</div>' +
+        '<div style="margin-top:8px;color:#9aa1b5;font-size:14px">Бета: есть</div>';
     } else if (active()) {
-      var forever = sub.forever !== false;
-      var days = forever ? '∞' : Math.max(0, Math.ceil(((sub.until || (sub.since || Date.now()) + 30 * 86400000) - Date.now()) / 86400000));
       html = '<div style="color:#9aa1b5;font-size:14px">Подписка: Бета</div>' +
-        '<span class="sub-badge" style="margin-top:10px;display:inline-flex">✅ Бета: ' + (forever ? 'навсегда' : 'активна') + '</span>' +
-        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Дней осталось: ' + days + ' · подписка активна</div>';
+        '<div style="margin-top:8px;color:#9aa1b5;font-size:14px">Бета: есть</div>';
     } else {
       html = '<div style="color:#9aa1b5;font-size:14px">Подписка: Фри</div>' +
-        '<div style="margin-top:8px;color:#9aa1b5;font-size:14px">Бета: не активирована</div>' +
-        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Введите ключ или оплатите доступ</div>';
+        '<div style="margin-top:8px;color:#9aa1b5;font-size:14px">Бета: нету</div>';
     }
     targets.forEach(function (el) { el.innerHTML = html; });
   }

@@ -119,6 +119,9 @@ async function fetchFuntime() {
           origin: ev.origin || '',
           sec: Number(ev.timeLeftSeconds) || 0
         };
+        // аирдропы и алтари не показываем
+        const skip = /AIR_DROP|AIRDROP|ALTAR|АИР|АЛТАРЬ|АИР-ДРОП|АЛТАРЬ/i;
+        if (skip.test(item.type) || skip.test(item.name)) return;
         const p = item.phase;
         // уже начавшиеся
         if (p === 'RUNNING' || p === 'LOOTING' || p === 'VOTING' || p === 'STOPPING') running.push(item);
@@ -280,23 +283,18 @@ module.exports = async (req, res) => {
     await sendLong(chat, text, keyboard);
     return res.status(200).json({ ok: true });
   }
-  // вопрос из этого бота → админ-боту
+  // вопрос из этого бота → твой личный question-бот
   const sAsk = await load();
   if (sAsk.asking && sAsk.asking[chat] && msg.text && msg.text.length > 2) {
     sAsk.asking[chat] = false;
     await save(sAsk);
-    try {
-      const qr = await fetch('https://nebulavisuals-public-sandy.vercel.app/question-state.json', { cache: 'no-store' });
-      if (qr.ok) {
-        const qs = await qr.json();
-        if (qs.adminChat) {
-          await tg(process.env.QUESTION_BOT_TOKEN || '', 'sendMessage', {
-            chat_id: qs.adminChat,
-            text: 'Вопрос из @paynebulabot:\n\n' + msg.text
-          });
-        }
-      }
-    } catch (e) {}
+    const adminChat = process.env.ADMIN_CHAT_ID || '';
+    if (adminChat) {
+      await tg(process.env.QUESTION_BOT_TOKEN || '', 'sendMessage', {
+        chat_id: adminChat,
+        text: 'Вопрос из @paynebulabot:\n\n' + msg.text
+      });
+    }
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }

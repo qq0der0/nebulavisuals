@@ -150,7 +150,7 @@
 
       if (u) {
         if (navAuth) navAuth.style.display = 'none';
-        if (navProfile) navProfile.style.display = 'flex';
+        if (navProfile) navProfile.style.display = 'none';
         // avatar: show image if set, else logo
         const avImg = document.getElementById('nav-avatar-img');
         if (avImg) avImg.src = myAvatarFull() || '/avatar-nebula.png';
@@ -566,12 +566,11 @@
   }
 
   /* ================= PROFILE ================= */
+  // profiling отключён: всегда остаёмся на главной
   const navProfileLink = document.getElementById('nav-profile-link');
   if (navProfileLink) {
-    navProfileLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.href = '/profile.html';
-    });
+    navProfileLink.style.display = 'none';
+    navProfileLink.setAttribute('href', '/');
   }
 
   /* ================= CHAT (ntfy.sh — общий онлайн-чат) ================= */
