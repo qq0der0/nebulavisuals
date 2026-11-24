@@ -16,6 +16,7 @@ const FUNTIME_URL = 'https://api.funtime.su/v2/events';
 
 let cache = null;
 let cacheAt = 0;
+let lastSend = { at: 0, ok: null, status: null, error: null, method: '' };
 const seen = new Set();
 const rate = new Map();
 
@@ -53,7 +54,11 @@ function tg(method, payload) {
       path: '/bot' + TOKEN + '/' + method,
       headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
     }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>{
-      try { const j=JSON.parse(b); if (!j.ok) console.error('Telegram error:', j.error_code, j.description); } catch(e) {}
+      try {
+        const j=JSON.parse(b);
+        lastSend = { at: Date.now(), ok: !!j.ok, status: resp.statusCode, error: j.description || null, method: method };
+        if (!j.ok) console.error('Telegram error:', j.error_code, j.description);
+      } catch(e) { lastSend = { at: Date.now(), ok: false, status: resp.statusCode, error: 'bad json', method: method }; }
       res(b);
     }); });
     r.on('error',()=>res('')); r.write(data); r.end();
@@ -208,6 +213,14 @@ function starsOf(msg) {
 }
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
+  if (req.method === 'GET') {
+    const ticket = (req.query && req.query.ticket) || '';
+    if (ticket) {
+      const st = await load();
+      return res.json({ ok: true, chat: (st.questions || {})[String(ticket)] || '' });
+    }
+    return res.json({ ok: true, token: !!TOKEN, funtime: !!FUNTIME_TOKEN, admin: !!process.env.ADMIN_CHAT_ID, lastSend });
+  }
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
   if (SECRET && req.headers['x-telegram-bot-api-secret-token'] !== SECRET) return res.status(403).json({ ok: false });
   const raw = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
@@ -287,16 +300,20 @@ module.exports = async (req, res) => {
   const sAsk = await load();
   if (sAsk.asking && sAsk.asking[chat] && msg.text && msg.text.length > 2) {
     sAsk.asking[chat] = false;
+    sAsk.questions = sAsk.questions || {};
+    sAsk.nextQuestion = Number(sAsk.nextQuestion) || 1;
+    const qid = String(sAsk.nextQuestion++);
+    sAsk.questions[qid] = chat;
     await save(sAsk);
     const adminChat = process.env.ADMIN_CHAT_ID || '';
     if (adminChat) {
       await tg(process.env.QUESTION_BOT_TOKEN || '', 'sendMessage', {
         chat_id: adminChat,
-        text: 'Вопрос из @paynebulabot:\n\n' + msg.text
+        text: '#Q' + qid + ' Вопрос из @paynebulabot:\n\n' + msg.text
       });
     }
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, ticket: qid });
   }
   // ввод промокода
   const sPromo = await load();

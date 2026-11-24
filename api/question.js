@@ -8,6 +8,7 @@ const SECRET = process.env.QUESTION_WEBHOOK_SECRET || '';
 const ADMIN = process.env.QUESTION_ADMIN_CHAT || '';
 const PASSWORD = process.env.QUESTION_PASSWORD || 'qqc0dAdmin1337';
 const BLOB_PATH = 'nebula/question-state.json';
+let lastSend = { at: 0, ok: null, status: null, error: null, method: '' };
 const seen = new Set();
 const rate = new Map();
 
@@ -23,7 +24,11 @@ function tg(token, method, payload) {
     const r = https.request({ hostname: 'api.telegram.org', method: 'POST',
       path: '/bot' + token + '/' + method,
       headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
-    }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>res(b)); });
+    }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>{
+      try { const j=JSON.parse(b); lastSend={ at:Date.now(), ok:!!j.ok, status:resp.statusCode, error:j.description||null, method:method }; }
+      catch(e) { lastSend={ at:Date.now(), ok:false, status:resp.statusCode, error:'bad json', method:method }; }
+      res(b);
+    }); });
     r.on('error',()=>res('')); r.write(data); r.end();
   });
 }
@@ -49,6 +54,9 @@ function parseId(text) {
 }
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
+  if (req.method === 'GET') {
+    return res.json({ ok: true, token: !!TOKEN, lastSend });
+  }
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
   if (SECRET && req.headers['x-telegram-bot-api-secret-token'] !== SECRET) return res.status(403).json({ ok: false });
   const raw = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
@@ -95,6 +103,18 @@ module.exports = async (req, res) => {
   if (isOwner) {
     const replyId = parseId(msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption));
     if (replyId && msg.text) {
+      // тикеты из @paynebulabot живут в его state — отвечаем через его токен
+      try {
+        const ps = await fetch('https://nebulavisuals-public-sandy.vercel.app/api/telegram?ticket=' + encodeURIComponent(replyId), { cache: 'no-store' });
+        if (ps.ok) {
+          const pj = await ps.json();
+          if (pj.chat) {
+            await tg(process.env.TELEGRAM_BOT_TOKEN || TOKEN, 'sendMessage', { chat_id: pj.chat, text: 'Ответ:\n\n' + msg.text });
+            await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Ответ отправлен человеку (тикет #Q' + replyId + ').' });
+            return res.status(200).json({ ok: true });
+          }
+        }
+      } catch (e) {}
       const t = s.tickets[replyId];
       if (t) {
         await tg(TOKEN, 'sendMessage', { chat_id: t.chat, text: 'Ответ:\n\n' + msg.text });
@@ -104,9 +124,6 @@ module.exports = async (req, res) => {
       } else {
         await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Тикет #Q' + replyId + ' не найден.' });
       }
-    }
-    if (msg.text && msg.text.length > 2) {
-      await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Вопрос принят. Ответьте на него, чтобы отправить ответ человеку.' });
     }
     return res.status(200).json({ ok: true });
   }
