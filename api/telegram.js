@@ -7,9 +7,12 @@ try { blob = require('@vercel/blob'); } catch (e) { blob = null; }
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const GOAL = 125;
+const GOAL_PROMO = 110; // промокод qqc0d / Nebula даёт -10% → 110 ⭐
 const BLOB_PATH = 'nebula/paynebula-state.json';
 const EVENT_BLOB = 'nebula/events-live.json';
 const KEYS_URL = 'https://nebulavisuals-public-sandy.vercel.app/keys.json';
+const FUNTIME_TOKEN = process.env.FUNTIME_CLIENT_TOKEN || '';
+const FUNTIME_URL = 'https://api.funtime.su/v2/events';
 
 let cache = null;
 let cacheAt = 0;
@@ -61,6 +64,31 @@ async function save(s) {
     }
   } catch (e) {}
   cache = s; cacheAt = Date.now();
+}
+function fmtTime(sec) {
+  sec = Number(sec) || 0;
+  const m = Math.floor(sec / 60);
+  const s = String(sec % 60).padStart(2, '0');
+  return m + ':' + s;
+}
+async function fetchFuntime() {
+  if (!FUNTIME_TOKEN) return null;
+  try {
+    const r = await fetch(FUNTIME_URL, { headers: { 'client-token': FUNTIME_TOKEN }, cache: 'no-store' });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const list = Array.isArray(data) ? data : (data.events || data.data || []);
+    if (!list.length) return null;
+    const current = list.map(function (ev) {
+      const name = ev.name || ev.type || 'Ивент';
+      const server = ev.server || '';
+      return server ? (name + ' → ' + server) : name;
+    });
+    const next = fmtTime(Math.min.apply(null, list.map(function (ev) { return Number(ev.timeLeftSeconds) || 0; }).filter(function (x) { return x > 0; })) || 0);
+    const e = { current: current, next: next || '—', shown: current.length + ' из ' + current.length, ts: Date.now(), live: true };
+    await saveEvents(e);
+    return e;
+  } catch (err) { return null; }
 }
 async function loadEvents() {
   try {
@@ -137,7 +165,7 @@ module.exports = async (req, res) => {
   const keyboard = {
     keyboard: [
       [{ text: 'Купить' }, { text: 'О нас' }],
-      [{ text: 'Задать вопрос' }],
+      [{ text: 'Задать вопрос' }, { text: 'Промокод' }],
       [{ text: 'Ближайшие ивенты' }, { text: 'Текущие ивенты' }]
     ],
     resize_keyboard: true,
@@ -149,6 +177,16 @@ module.exports = async (req, res) => {
       text: 'Привет это чат с покупкой NebulaVisuals выбери пункт который тебе надо!',
       reply_markup: keyboard
     });
+    return res.status(200).json({ ok: true });
+  }
+  if (msg.text === 'Промокод') {
+    const sp = await load();
+    sp.promo = sp.promo || {};
+    sp.promo[chat] = true;
+    await save(sp);
+    await tg('sendMessage', { chat_id: chat,
+      text: 'Введите промокод (qqc0d или Nebula) — скидка 10%, цель станет ' + GOAL_PROMO + ' ⭐ вместо ' + GOAL + '.',
+      reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }
   if (msg.text === 'Купить' || msg.text === 'О нас' || msg.text === 'Задать вопрос' ||
@@ -166,8 +204,8 @@ module.exports = async (req, res) => {
       text = 'Задайте вопрос тут:';
     } else {
       try {
-        const e = await loadEvents() || await (await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json')).json();
-        text = formatEvents(e);
+        const e = await fetchFuntime() || await loadEvents() || await (await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json')).json();
+        text = (e.live ? '🔴 LIVE · ' : '') + formatEvents(e);
       } catch (err) {
         text = 'Не удалось загрузить список ивентов.';
       }
@@ -195,14 +233,39 @@ module.exports = async (req, res) => {
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }
+  // ввод промокода: цель 125 → 110
+  const sPromo = await load();
+  if (sPromo.promo && sPromo.promo[chat] && msg.text && /^[A-Za-z0-9_-]{3,32}$/.test(msg.text)) {
+    const code = msg.text.trim().toLowerCase();
+    sPromo.promo[chat] = false;
+    if (code === 'qqc0d' || code === 'nebula') {
+      sPromo.goal = sPromo.goal || {};
+      sPromo.goal[chat] = GOAL_PROMO;
+      await save(sPromo);
+      await tg('sendMessage', { chat_id: chat, text: 'Промокод принят! Теперь нужно ' + GOAL_PROMO + ' ⭐ (было ' + GOAL + ').', reply_markup: keyboard });
+      return res.status(200).json({ ok: true, goal: GOAL_PROMO });
+    }
+    await tg('sendMessage', { chat_id: chat, text: 'Промокод не найден. Попробуйте qqc0d или Nebula.', reply_markup: keyboard });
+    return res.status(200).json({ ok: true });
+  }
+
   const got = starsOf(msg);
   if (got <= 0) return res.status(200).json({ ok: true });
+
+  // уведомление администратору о поступивших звёздах
+  try {
+    if (process.env.ADMIN_CHAT_ID) {
+      await tg('sendMessage', { chat_id: process.env.ADMIN_CHAT_ID,
+        text: '💎 Поступило ' + got + ' ⭐ от ' + chat + '. Всего: ' + ((await load()).stars[chat] || 0) });
+    }
+  } catch (e) {}
 
   const s = await load();
   s.stars[chat] = Number(s.stars[chat] || 0) + got;
   const have = s.stars[chat];
-  let text = 'Получено ' + got + ' ⭐. Всего: ' + have + '/' + GOAL + '. ';
-  if (have >= GOAL && !s.issued[chat]) {
+  const goal = (s.goal && s.goal[chat]) || GOAL;
+  let text = 'Получено ' + got + ' ⭐. Всего: ' + have + '/' + goal + '. ';
+  if (have >= goal && !s.issued[chat]) {
     try {
       const r = await fetch(KEYS_URL); const keys = await r.json();
       const used = new Set(Object.values(s.issued));
@@ -213,7 +276,7 @@ module.exports = async (req, res) => {
   } else if (s.issued[chat]) {
     text += 'Ваш ключ: ' + s.issued[chat];
   } else {
-    text += 'До ключа ещё ' + (GOAL - have) + ' ⭐.';
+    text += 'До ключа ещё ' + (goal - have) + ' ⭐.';
   }
   await save(s);
   await tg('sendMessage', { chat_id: chat, text: text });

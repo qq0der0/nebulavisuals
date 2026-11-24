@@ -141,13 +141,10 @@
   }
 
   function addButtons() {
-    var topbar = document.querySelector('.topbar');
-    if (topbar && !document.getElementById('nkKeyBtn')) {
-      var b = document.createElement('button');
-      b.id = 'nkKeyBtn'; b.className = 'nk-btn'; b.type = 'button'; b.textContent = 'Ввести ключ';
-      b.style.marginLeft = '8px';
-      b.addEventListener('click', function () { keyModal.classList.add('open'); setTimeout(function(){document.getElementById('nkKeyInput').focus();},60); });
-      topbar.appendChild(b);
+    var keyBtn = document.getElementById('nkKeyBtn');
+    if (keyBtn && !keyBtn.dataset.bound) {
+      keyBtn.dataset.bound = '1';
+      keyBtn.addEventListener('click', function () { keyModal.classList.add('open'); setTimeout(function(){document.getElementById('nkKeyInput').focus();},60); });
     }
     var home = document.getElementById('tab-home');
     if (home && !document.getElementById('nkPayHome')) {
