@@ -131,7 +131,7 @@
         const target = document.getElementById('tab-' + tab);
         if (target) target.classList.add('active');
         const title = document.getElementById('page-title');
-        if (title) title.textContent = tab === 'home' ? 'Главная' : tab === 'media' ? 'Медиа' : 'Безопасность';
+        if (title) title.textContent = tab === 'home' ? 'Главная' : tab === 'media' ? 'Медиа' : tab === 'subscription' ? 'Подписка' : 'Безопасность';
       });
     });
 

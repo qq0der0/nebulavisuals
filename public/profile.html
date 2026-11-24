@@ -213,6 +213,10 @@ body:has(.shell) { min-height:100vh; }
         <img src="/logo-nav.png" alt="" class="nav-icon-img">
         <span>Медиа</span>
       </button>
+      <button class="nav-item" data-tab="subscription">
+        <img src="/security.svg" alt="" class="nav-icon-img">
+        <span>Подписка</span>
+      </button>
     </nav>
 
     <button class="logout-btn" id="logout-btn">
@@ -314,12 +318,21 @@ body:has(.shell) { min-height:100vh; }
         <div style="text-align:center;padding:44px 12px;font-size:22px;font-weight:800;letter-spacing:2px;color:#c6a8ff;">soon...</div>
       </div>
     </section>
+
+    <!-- SUBSCRIPTION TAB -->
+    <section class="tab-content" id="tab-subscription">
+      <div class="panel">
+        <h3 class="panel-title">Подписка</h3>
+        <div id="sub-status"></div>
+      </div>
+    </section>
   </main>
 </div>
 
 <div class="toast" id="toast" hidden></div>
 
 <script src="/chat-backend.js"></script>
+<script src="/keys.js"></script>
 <script src="/profile.js"></script>
 </body>
 </html>
