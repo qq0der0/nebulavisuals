@@ -8,6 +8,7 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const GOAL = 125;
 const BLOB_PATH = 'nebula/paynebula-state.json';
+const EVENT_BLOB = 'nebula/events-live.json';
 const KEYS_URL = 'https://nebulavisuals-public-sandy.vercel.app/keys.json';
 
 let cache = null;
@@ -61,6 +62,44 @@ async function save(s) {
   } catch (e) {}
   cache = s; cacheAt = Date.now();
 }
+async function loadEvents() {
+  try {
+    if (blob && process.env.BLOB_READ_WRITE_TOKEN) {
+      const res = await blob.get(EVENT_BLOB, { access: 'private' });
+      if (res && res.stream) return JSON.parse(await new Response(res.stream).text());
+    }
+  } catch (e) {}
+  return null;
+}
+async function saveEvents(e) {
+  try {
+    if (blob && process.env.BLOB_READ_WRITE_TOKEN) {
+      await blob.put(EVENT_BLOB, JSON.stringify(e), { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
+    }
+  } catch (err) {}
+}
+function parseEvents(text) {
+  const lines = String(text || '').split(/\r?\n/);
+  const current = [];
+  let next = '';
+  let shown = '';
+  lines.forEach(function (l) {
+    const e = l.match(/(Анархия\s*→\s*\d+)/);
+    if (e) current.push(e[1]);
+    const n = l.match(/До следующего ивента:\s*([\d:]+)/);
+    if (n) next = n[1];
+    const sh = l.match(/Отображено ближайших ивентов:\s*([^\n]+)/);
+    if (sh) shown = sh[1].trim();
+  });
+  if (!current.length) return null;
+  return { current: current, next: next || '—', shown: shown || (current.length + ' из ' + current.length), ts: Date.now() };
+}
+function formatEvents(e) {
+  return '📌 Ивенты сервера FunTime (обновлено ' + new Date(e.ts || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ')\n\n' +
+    'До следующего ивента: ' + e.next + '\n\n' +
+    (e.current || []).map(function (x) { return '📌 ' + x + '\n   До следующего ивента: ' + e.next; }).join('\n') +
+    '\n\nОтображено ближайших ивентов: ' + e.shown;
+}
 function starsOf(msg) {
   if (msg.gift) return Number(msg.gift.star_count || msg.gift.total_stars || 0);
   if (msg.successful_payment && msg.successful_payment.currency === 'XTR') return Number(msg.successful_payment.total_amount || 0);
@@ -84,11 +123,22 @@ module.exports = async (req, res) => {
   const chat = String((msg.chat && msg.chat.id) || '');
   if (!chat || blocked(chat)) return res.status(200).json({ ok: true });
 
+  //实时 ивенты: пересланные сообщения от @deltaclient_bot или сообщения в группе
+  const evText = msg.text || msg.caption || '';
+  if (evText.indexOf('Анархия →') !== -1 && evText.indexOf('До следующего ивента') !== -1) {
+    const parsed = parseEvents(evText);
+    if (parsed) {
+      await saveEvents(parsed);
+      await tg('sendMessage', { chat_id: chat, text: '✅ Ивенты обновлены в реальном времени.\n\n' + formatEvents(parsed) });
+      return res.status(200).json({ ok: true, events: parsed.current.length });
+    }
+  }
+
   const keyboard = {
     keyboard: [
       [{ text: 'Купить' }, { text: 'О нас' }],
       [{ text: 'Задать вопрос' }],
-      [{ text: 'Ближайшие шахты и ивенты' }]
+      [{ text: 'Ближайшие ивенты' }, { text: 'Текущие ивенты' }]
     ],
     resize_keyboard: true,
     one_time_keyboard: false
@@ -101,26 +151,48 @@ module.exports = async (req, res) => {
     });
     return res.status(200).json({ ok: true });
   }
-  if (msg.text === 'Купить' || msg.text === 'О нас' || msg.text === 'Задать вопрос' || msg.text === 'Ближайшие шахты и ивенты') {
+  if (msg.text === 'Купить' || msg.text === 'О нас' || msg.text === 'Задать вопрос' ||
+      msg.text === 'Ближайшие ивенты' || msg.text === 'Текущие ивенты') {
     let text = '';
     if (msg.text === 'Купить') {
-      text = 'Бета Nebula Visuals — 199 ₽. Промокоды qqc0d и Nebula дают скидку 10%.\nFunPay: https://funpay.com/lots/offer?id=83124206';
+      text = 'Чтобы мы дали вам ключ оплатите 125 звезд или купите на сайте: https://nebulavisuals-public-sandy.vercel.app/';
     } else if (msg.text === 'О нас') {
       text = 'Nebula Visuals — клиент для Minecraft с визуальными эффектами, стабильным FPS и умной оптимизацией. Один лаунчер — и игра обновляется сама.';
     } else if (msg.text === 'Задать вопрос') {
-      text = 'Напишите ваш вопрос в бот @NebulaQuestionbot — он придёт администратору, а ответ вернётся сюда.';
+      const s0 = await load();
+      s0.asking = s0.asking || {};
+      s0.asking[chat] = true;
+      await save(s0);
+      text = 'Задайте вопрос тут:';
     } else {
       try {
-        const r = await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json');
-        const e = await r.json();
-        text = '📌 Ивенты сервера FunTime\n\nДо следующего ивента: ' + e.next + '\n\n' +
-          (e.current || []).map(x => '📌 ' + x + '\n   До следующего ивента: ' + e.next).join('\n') +
-          '\n\nОтображено ближайших ивентов: ' + e.shown;
+        const e = await loadEvents() || await (await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json')).json();
+        text = formatEvents(e);
       } catch (err) {
         text = 'Не удалось загрузить список ивентов.';
       }
     }
     await tg('sendMessage', { chat_id: chat, text: text, reply_markup: keyboard, disable_web_page_preview: true });
+    return res.status(200).json({ ok: true });
+  }
+  // вопрос из этого бота → админ-боту
+  const sAsk = await load();
+  if (sAsk.asking && sAsk.asking[chat] && msg.text && msg.text.length > 2) {
+    sAsk.asking[chat] = false;
+    await save(sAsk);
+    try {
+      const qr = await fetch('https://nebulavisuals-public-sandy.vercel.app/question-state.json', { cache: 'no-store' });
+      if (qr.ok) {
+        const qs = await qr.json();
+        if (qs.adminChat) {
+          await tg(process.env.QUESTION_BOT_TOKEN || '', 'sendMessage', {
+            chat_id: qs.adminChat,
+            text: 'Вопрос из @paynebulabot:\n\n' + msg.text
+          });
+        }
+      }
+    } catch (e) {}
+    await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }
   const got = starsOf(msg);
