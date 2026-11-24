@@ -84,8 +84,43 @@ module.exports = async (req, res) => {
   const chat = String((msg.chat && msg.chat.id) || '');
   if (!chat || blocked(chat)) return res.status(200).json({ ok: true });
 
+  const keyboard = {
+    keyboard: [
+      [{ text: 'Купить' }, { text: 'О нас' }],
+      [{ text: 'Задать вопрос' }],
+      [{ text: 'Ближайшие шахты и ивенты' }]
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: false
+  };
   if (msg.text && msg.text.startsWith('/start')) {
-    await tg('sendMessage', { chat_id: chat, text: 'Привет! Кидай подарки со звёздами — я считаю прогресс до ключа. Цель: ' + GOAL + ' ⭐.' });
+    await tg('sendMessage', {
+      chat_id: chat,
+      text: 'Привет это чат с покупкой NebulaVisuals выбери пункт который тебе надо!',
+      reply_markup: keyboard
+    });
+    return res.status(200).json({ ok: true });
+  }
+  if (msg.text === 'Купить' || msg.text === 'О нас' || msg.text === 'Задать вопрос' || msg.text === 'Ближайшие шахты и ивенты') {
+    let text = '';
+    if (msg.text === 'Купить') {
+      text = 'Бета Nebula Visuals — 199 ₽. Промокоды qqc0d и Nebula дают скидку 10%.\nFunPay: https://funpay.com/lots/offer?id=83124206';
+    } else if (msg.text === 'О нас') {
+      text = 'Nebula Visuals — клиент для Minecraft с визуальными эффектами, стабильным FPS и умной оптимизацией. Один лаунчер — и игра обновляется сама.';
+    } else if (msg.text === 'Задать вопрос') {
+      text = 'Напишите ваш вопрос в бот @NebulaQuestionbot — он придёт администратору, а ответ вернётся сюда.';
+    } else {
+      try {
+        const r = await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json');
+        const e = await r.json();
+        text = '📌 Ивенты сервера FunTime\n\nДо следующего ивента: ' + e.next + '\n\n' +
+          (e.current || []).map(x => '📌 ' + x + '\n   До следующего ивента: ' + e.next).join('\n') +
+          '\n\nОтображено ближайших ивентов: ' + e.shown;
+      } catch (err) {
+        text = 'Не удалось загрузить список ивентов.';
+      }
+    }
+    await tg('sendMessage', { chat_id: chat, text: text, reply_markup: keyboard, disable_web_page_preview: true });
     return res.status(200).json({ ok: true });
   }
   const got = starsOf(msg);
