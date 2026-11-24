@@ -106,11 +106,36 @@ button, input, textarea, select, optgroup, label, legend, fieldset {
   line-height: inherit;
 }
 
-/* ===== VIDEO BACKGROUND (FIXED - NO PARALLAX) ===== */
-/* Фон страницы — ровный тёмный (без видео и градиентной полосы сверху) */
-.bg-video,
+/* ===== ВИДЕО-ОБОИ + ДВИЖУЩЕЕСЯ ФИОЛЕТОВОЕ СВЕЧЕНИЕ ===== */
+.bg-video {
+  position: fixed; inset: 0; z-index: -3;
+  width: 100vw; height: 100vh;
+  object-fit: cover; object-position: center;
+  opacity: .82; pointer-events: none;
+  transform: translateZ(0); will-change: transform;
+}
 .bg-overlay {
-  display: none !important;
+  position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden;
+  background: linear-gradient(180deg, rgba(8,8,22,.30) 0%, rgba(8,8,22,.14) 40%, rgba(8,8,22,.70) 100%);
+}
+.bg-aura {
+  position: absolute; left: -20%; top: -35%; width: 140vw; height: 90vh;
+  background:
+    radial-gradient(45% 55% at 28% 35%, rgba(168,107,255,.34), transparent 72%),
+    radial-gradient(40% 48% at 72% 20%, rgba(98,86,255,.26), transparent 74%),
+    radial-gradient(35% 45% at 52% 60%, rgba(208,120,255,.16), transparent 76%);
+  filter: blur(38px);
+  transform: translate3d(0,0,0) scale(1.05);
+  animation: bgAuraFloat 18s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes bgAuraFloat {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1.05); opacity: .85; }
+  50%  { transform: translate3d(4%, 3%, 0) scale(1.12); opacity: 1; }
+  100% { transform: translate3d(-2%, 5%, 0) scale(1.08); opacity: .9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-aura { animation: none; }
 }
 
 /* Particles Canvas */
@@ -1650,11 +1675,62 @@ img, video, iframe, canvas { max-width: 100%; }
 .dl-progress-cancel:hover { background: rgba(255, 255, 255, 0.08); }
 .dl-progress-note { margin-top: 8px; font-size: 11.5px; line-height: 1.45; color: rgba(240, 242, 250, 0.5); }
 
-/* ===== Фото-фон + лёгкий параллакс за курсором ===== */
+/* ===== ЗАСТАВКА ПРИ ВХОДЕ ===== */
+.nv-intro {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(70% 70% at 50% 45%, #171233 0%, #090713 62%, #05040b 100%);
+  transition: opacity .7s ease, visibility .7s ease, background .55s ease;
+}
+.nv-intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
+/* на финале фон становится прозрачным — видно шапку, к которой летит иконка */
+.nv-intro.flying { background: transparent; }
+.nv-intro-stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
+.nv-intro-logo {
+  width: 190px; height: 190px; object-fit: contain; position: relative; z-index: 2;
+  filter: drop-shadow(0 0 28px rgba(168,107,255,.55));
+  transform: translate3d(0,0,0) scale(1);
+  transition: transform 1.05s cubic-bezier(.22,.9,.28,1), opacity .5s ease, filter .7s ease;
+}
+.nv-intro-ring { position: absolute; inset: 20px; width: 260px; height: 260px; transform: rotate(-90deg); z-index: 1; }
+.nv-intro-ring circle { fill: none; stroke-width: 3; }
+.nv-intro-ring-track { stroke: rgba(198,178,255,.11); }
+.nv-intro-ring-fill {
+  stroke: url(#nvIntroGradient);
+  stroke: #b79bff;
+  stroke-linecap: round;
+  stroke-dasharray: 628.32;
+  stroke-dashoffset: 628.32;
+  filter: drop-shadow(0 0 8px rgba(168,107,255,.9));
+  animation: nvRingFill 2.1s cubic-bezier(.35,.1,.25,1) forwards;
+}
+@keyframes nvRingFill { to { stroke-dashoffset: 0; } }
+/* логотип «улетает» в шапку */
+.nv-intro.flying .nv-intro-logo { filter: drop-shadow(0 0 12px rgba(168,107,255,.4)); }
+.nv-intro.flying .nv-intro-ring { opacity: 0; transition: opacity .35s ease; }
+.nv-intro.flying .nv-intro-stage::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, rgba(168,107,255,.28), transparent 65%);
+  animation: nvRingBurst .8s ease-out forwards;
+}
+@keyframes nvRingBurst { to { transform: scale(2.4); opacity: 0; } }
+/* контент проявляется после заставки */
+body.nv-intro-active { overflow: hidden; }
+body.nv-intro-active .nav, body.nv-intro-active main, body.nv-intro-active .footer { opacity: 0; }
+body.nv-intro-done .nav, body.nv-intro-done main, body.nv-intro-done .footer {
+  opacity: 1; transition: opacity .8s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nv-intro-ring-fill { animation-duration: .01ms; }
+  .nv-intro-logo { transition-duration: .01ms; }
+}
+
+/* ===== Фото-фон + лёгкий параллакс за курсором (под видео) ===== */
 .bg-photo {
     position: fixed;
     inset: -60px;
-    z-index: -1;
+    z-index: -2;
+    opacity: .22;
     background-color: #0b1020;
     background-image: url('/bg.png');
     background-size: cover;

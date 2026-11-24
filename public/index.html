@@ -221,7 +221,7 @@ body:has(.shell) { min-height:100vh; }
   .chat-rules-side, .chat-online { display:none; }
 }
 /* ===== Header fixes: alignment, brand, TG icon, login button ===== */
-.brand { flex:0 0 auto !important; min-width:0 !important; gap:12px !important; margin-left: clamp(8px, 3vw, 40px) !important; }
+.brand { flex:0 0 auto !important; min-width:0 !important; gap:10px !important; margin-left:10px !important; margin-right:26px !important; }
 .brand-name { white-space:nowrap !important; font-size:17px !important; }
 .nav-links { margin:0 auto !important; justify-content:center !important; align-items:center !important; }
 .nav-right { margin:0 !important; align-items:center !important; gap:10px !important; flex:0 0 auto !important; }
@@ -286,13 +286,29 @@ header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 
 
 </head>
 <body>
+<!-- ЗАСТАВКА: логотип + заполняющийся круг (без кнопок) -->
+<div class="nv-intro" id="nvIntro" aria-hidden="true">
+  <div class="nv-intro-stage">
+    <svg class="nv-intro-ring" viewBox="0 0 220 220" aria-hidden="true">
+      <circle class="nv-intro-ring-track" cx="110" cy="110" r="100"></circle>
+      <circle class="nv-intro-ring-fill" id="nvIntroRing" cx="110" cy="110" r="100"></circle>
+    </svg>
+    <img class="nv-intro-logo" id="nvIntroLogo" src="/logo-main.png" alt="">
+  </div>
+</div>
 <!-- PARTICLES CANVAS -->
 <canvas id="particles" class="particles-canvas"></canvas>
+<!-- ВИДЕО-ОБОИ с движущимся фиолетовым свечением -->
+<video class="bg-video" id="bg-video" autoplay muted loop playsinline poster="/bg.png" aria-hidden="true">
+  <source src="/bg-video.mp4" type="video/mp4">
+</video>
+<div class="bg-overlay" aria-hidden="true"><div class="bg-aura"></div></div>
 <div class="bg-photo" id="bgPhoto" aria-hidden="true"></div>
 
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a class="brand" href="#top" aria-label="Nebula Visuals — главная">
+      <img class="brand-logo-icon" id="brandLogo" src="/logo-nav.png" alt="">
       <span class="brand-name">NebulaVisuals</span>
     </a>
     <nav class="nav-links" id="nav-links">
@@ -366,7 +382,7 @@ header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 
     <div class="hero-bg-glow"></div>
     <div class="hero-grid-glow"></div>
     <div class="hero-inner">
-      <div class="hero-badge">Minecraft 1.21.4 · Fabric</div>
+      <div class="hero-badge">Обновление 2.1.8 · Minecraft 1.21.4 · Fabric</div>
       <h1 class="hero-title">
         <span class="hero-title-line">Клиент</span>
         <span class="hero-title-line gradient-text">Nebula Visuals</span>
@@ -374,7 +390,7 @@ header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 
       <p class="hero-sub">Визуальные эффекты, стабильный FPS и умная оптимизация. Один клик — лаунчер сам скачает игру и запустит её.</p>
       <div class="hero-buttons">
         <a class="btn btn-primary btn-lg js-smart-dl" id="download-btn" href="https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.8/Nebula.Visuals.Setup.2.1.8.exe" download rel="noopener">
-          <span class="btn-text">Скачать установщик</span>
+          <span class="btn-text">Скачать лаунчер</span>
           <span class="btn-icon" aria-hidden="true">⬇</span>
         </a>
         <a class="btn btn-ghost btn-lg" href="#server">
@@ -598,11 +614,11 @@ header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 
     </div>
     <div class="file-download">
       <a class="btn btn-primary btn-lg js-smart-dl" href="https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.8/Nebula.Visuals.Setup.2.1.8.exe" download rel="noopener">
-        <span class="btn-text">Скачать установщик</span>
+        <span class="btn-text">Скачать лаунчер</span>
         <span class="btn-icon" aria-hidden="true">⬇</span>
       </a>
       
-      <p class="section-sub" style="margin-top:12px;font-size:13px;opacity:.7;">Windows · ~238 МБ · версия 2.1.8</p>
+      <p class="section-sub" style="margin-top:12px;font-size:13px;opacity:.7;">Скачать обновление 2.1.8 · Windows · ~238 МБ</p>
     </div>
   </section>
 

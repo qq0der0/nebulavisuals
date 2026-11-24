@@ -380,6 +380,62 @@
     if (el) el.textContent = val;
   }
 
+  /* ================= ЗАСТАВКА ПРИ ВХОДЕ НА САЙТ ================= */
+  (function intro() {
+    const box = document.getElementById('nvIntro');
+    const logo = document.getElementById('nvIntroLogo');
+    const ring = document.getElementById('nvIntroRing');
+    const brandLogo = document.getElementById('brandLogo');
+    const brandName = document.querySelector('.brand-name');
+    if (!box || !logo) return;
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.add('nv-intro-active');
+    // Круг заполняется ровно за время анимации (2.1 c)
+    if (ring && !reduced) {
+      ring.style.animation = 'none';
+      void ring.getBoundingClientRect();
+      ring.style.animation = '';
+    }
+    const finish = () => {
+      // логотип красиво перелетает к надписи NebulaVisuals в шапке
+      const target = (brandLogo && brandLogo.getBoundingClientRect()) || (brandName && brandName.getBoundingClientRect());
+      if (target && !reduced) {
+        const from = logo.getBoundingClientRect();
+        const dx = (target.left + target.width / 2) - (from.left + from.width / 2);
+        const dy = (target.top + target.height / 2) - (from.top + from.height / 2);
+        const scale = Math.max(0.12, Math.min(1, target.width / from.width));
+        box.classList.add('flying');
+        logo.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0) scale(' + scale + ')';
+        if (brandLogo) brandLogo.style.opacity = '0';
+      }
+      setTimeout(() => {
+        document.body.classList.remove('nv-intro-active');
+        document.body.classList.add('nv-intro-done');
+        box.classList.add('done');
+        if (brandLogo) brandLogo.style.opacity = '';
+        if (brandName) {
+          brandName.animate(
+            [{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(-4px)' },
+             { opacity: 1, filter: 'blur(0)', transform: 'translateY(0)' }],
+            { duration: reduced ? 1 : 700, easing: 'ease-out' }
+          );
+        }
+        setTimeout(() => { if (box.parentNode) box.parentNode.removeChild(box); }, 800);
+      }, reduced ? 30 : 900);
+    };
+    // ждём и картинку, и минимальную задержку — «мини-загрузка»
+    const t0 = performance.now();
+    const ready = new Promise((resolve) => {
+      if (logo.complete) return resolve();
+      logo.addEventListener('load', resolve, { once: true });
+      logo.addEventListener('error', resolve, { once: true });
+    });
+    Promise.all([ready, new Promise(r => setTimeout(r, reduced ? 60 : 2100))]).then(() => {
+      const wait = Math.max(0, (reduced ? 60 : 2100) - (performance.now() - t0));
+      setTimeout(finish, wait);
+    });
+  })();
+
   /* ================= VIDEO BG ================= */
   const bgVideo = document.getElementById('bg-video');
   if (bgVideo) {
