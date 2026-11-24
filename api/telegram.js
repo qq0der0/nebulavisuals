@@ -102,7 +102,8 @@ async function fetchFuntime() {
     if (!r.ok) return null;
     const data = await r.json();
     const groups = Array.isArray(data) ? data : (data.items || data.events || data.data || []);
-    const list = [];
+    const upcoming = [];
+    const running = [];
     let nextSec = 0;
     groups.forEach(function (g) {
       if (g.server) {
@@ -110,17 +111,31 @@ async function fetchFuntime() {
         if (sec && (!nextSec || sec < nextSec)) nextSec = sec;
       }
       (g.events || []).forEach(function (ev) {
-        list.push({ name: ev.name || ev.type || 'Ивент', server: g.server || ev.server || '', type: ev.type || '', phase: ev.phase || '', sec: Number(ev.timeLeftSeconds) || 0 });
+        const item = {
+          name: ev.name || ev.type || 'Ивент',
+          server: g.server || ev.server || '',
+          type: ev.type || '',
+          phase: String(ev.phase || '').toUpperCase(),
+          origin: ev.origin || '',
+          sec: Number(ev.timeLeftSeconds) || 0
+        };
+        const p = item.phase;
+        // уже начавшиеся
+        if (p === 'RUNNING' || p === 'LOOTING' || p === 'VOTING' || p === 'STOPPING') running.push(item);
+        // объявленные — до начала
+        else upcoming.push(item);
       });
     });
-    if (!list.length) return null;
-    const current = list.map(function (ev) {
-      let label = ev.name + (ev.server ? ' → ' + ev.server : '');
-      if (ev.phase) label += ' [' + ev.phase + ']';
-      return label;
-    });
-    const next = fmtTime(nextSec || Math.min.apply(null, list.map(function (ev) { return ev.sec; }).filter(function (x) { return x > 0; })) || 0);
-    const e = { current: current, next: next || '—', shown: current.length + ' из ' + current.length, ts: Date.now(), live: true };
+    if (!upcoming.length && !running.length) return null;
+    const e = {
+      upcoming: upcoming,
+      running: running,
+      current: upcoming.concat(running),
+      next: fmtTime(nextSec || Math.min.apply(null, upcoming.map(function (x) { return x.sec; }).filter(function (x) { return x > 0; })) || 0) || '—',
+      shown: upcoming.length + ' из ' + (upcoming.length + running.length),
+      ts: Date.now(),
+      live: true
+    };
     await saveEvents(e);
     return e;
   } catch (err) { return null; }
@@ -157,11 +172,30 @@ function parseEvents(text) {
   if (!current.length) return null;
   return { current: current, next: next || '—', shown: shown || (current.length + ' из ' + current.length), ts: Date.now() };
 }
-function formatEvents(e) {
-  return '📌 Ивенты сервера FunTime (обновлено ' + new Date(e.ts || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ')\n\n' +
-    'До следующего ивента: ' + e.next + '\n\n' +
-    (e.current || []).map(function (x) { return '📌 ' + x + '\n   До следующего ивента: ' + e.next; }).join('\n') +
-    '\n\nОтображено ближайших ивентов: ' + e.shown;
+function shortServer(s) {
+  // anarchy1001 → анка 1001
+  const m = String(s || '').match(/anarchy(\d+)/i);
+  return m ? ('анка ' + m[1]) : (s || '—');
+}
+function formatEvents(e, mode) {
+  const head = '📌 Ивенты сервера FunTime (обновлено ' + new Date(e.ts || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ')\n\n';
+  if (mode === 'current') {
+    const list = e.running || [];
+    if (!list.length) return head + 'Сейчас идущих ивентов нет.';
+    return head + 'Текущие ивенты (уже идут):\n\n' + list.map(function (x) {
+      return '📌 ' + x.name + ' → ' + shortServer(x.server) + '\n   ' + x.phase.toLowerCase() +
+        (x.sec ? ' · осталось ' + fmtTime(x.sec) : '');
+    }).join('\n');
+  }
+  const list = e.upcoming || [];
+  let out = head + 'До следующего ивента: ' + (e.next || '—') + '\n\n';
+  if (!list.length) return out + 'Объявленных ивентов нет.';
+  out += 'Ближайшие ивенты (до начала):\n\n' + list.map(function (x) {
+    return '📌 ' + x.name + ' → ' + shortServer(x.server) + '\n   до начала ' + fmtTime(x.sec) +
+      (x.origin ? ' · ' + x.origin.toLowerCase() : '');
+  }).join('\n');
+  out += '\n\nОтображено ближайших ивентов: ' + (e.shown || list.length);
+  return out;
 }
 function starsOf(msg) {
   if (msg.gift) return Number(msg.gift.star_count || msg.gift.total_stars || 0);
@@ -192,7 +226,7 @@ module.exports = async (req, res) => {
     const parsed = parseEvents(evText);
     if (parsed) {
       await saveEvents(parsed);
-      await sendLong(chat, '✅ Ивенты обновлены в реальном времени.\n\n' + formatEvents(parsed));
+      await sendLong(chat, '✅ Ивенты обновлены в реальном времени.\n\n' + formatEvents(parsed, 'upcoming'));
       return res.status(200).json({ ok: true, events: parsed.current.length });
     }
   }
@@ -238,7 +272,7 @@ module.exports = async (req, res) => {
     } else {
       try {
         const e = await fetchFuntime() || await loadEvents() || await (await fetch('https://nebulavisuals-public-sandy.vercel.app/events.json')).json();
-        text = (e.live ? '🔴 LIVE · ' : '') + formatEvents(e);
+        text = (e.live ? '🔴 LIVE · ' : '') + formatEvents(e, msg.text === 'Текущие ивенты' ? 'current' : 'upcoming');
       } catch (err) {
         text = 'Не удалось загрузить список ивентов.';
       }
