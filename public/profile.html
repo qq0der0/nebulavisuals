@@ -172,6 +172,10 @@ body:has(.shell) { min-height:100vh; }
 <body>
 <!-- PARTICLES CANVAS -->
 <canvas id="particles" class="particles-canvas"></canvas>
+<video class="bg-video" id="bg-video" autoplay muted loop playsinline aria-hidden="true">
+  <source src="/bg-video.mp4" type="video/mp4">
+</video>
+<div class="bg-overlay" aria-hidden="true"><div class="bg-aura"></div></div>
 <div class="bg-photo" id="bgPhoto" aria-hidden="true"></div>
 
 <div class="shell">
@@ -205,6 +209,10 @@ body:has(.shell) { min-height:100vh; }
       <button class="nav-item" data-tab="security">
         <img src="/security.svg" alt="" class="nav-icon-img">
         <span>Безопасность</span>
+      </button>
+      <button class="nav-item" data-tab="media">
+        <img src="/logo-nav.png" alt="" class="nav-icon-img">
+        <span>Медиа</span>
       </button>
     </nav>
 
@@ -299,12 +307,21 @@ body:has(.shell) { min-height:100vh; }
         <div class="form-msg" id="pass-msg"></div>
       </div>
     </section>
+
+    <!-- MEDIA TAB -->
+    <section class="tab-content" id="tab-media">
+      <div class="panel">
+        <h3 class="panel-title">Медиа</h3>
+        <div style="text-align:center;padding:44px 12px;font-size:22px;font-weight:800;letter-spacing:2px;color:#c6a8ff;">soon...</div>
+      </div>
+    </section>
   </main>
 </div>
 
 <div class="toast" id="toast" hidden></div>
 
 <script src="/chat-backend.js"></script>
+<script src="/promo.js"></script>
 <script src="/profile.js"></script>
 </body>
 </html>

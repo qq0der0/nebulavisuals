@@ -1685,6 +1685,9 @@ img, video, iframe, canvas { max-width: 100%; }
 .nv-intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
 /* на финале фон становится прозрачным — видно шапку, к которой летит иконка */
 .nv-intro.flying { background: transparent; }
+/* шапка профиля: логотип и надпись чуть левее, меню не наезжает */
+body:not(.nv-intro-active) .nav-inner .brand { margin-left: 10px !important; margin-right: 28px !important; }
+body:not(.nv-intro-active) .nav-inner .brand-logo-icon { width: 34px !important; height: 34px !important; }
 .nv-intro-stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
 .nv-intro-logo {
   width: 190px; height: 190px; object-fit: contain; position: relative; z-index: 2;

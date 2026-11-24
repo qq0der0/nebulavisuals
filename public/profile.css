@@ -33,11 +33,31 @@ body {
   overflow-x: hidden;
 }
 
-/* Фон — ровный тёмный, без видео и размытия */
-.bg-video,
-.bg-overlay {
-  display: none !important;
+/* Те же видео-обои и фиолетовое свечение, что и на главной */
+.bg-video {
+  position: fixed; inset: 0; z-index: -3;
+  width: 100vw; height: 100vh; object-fit: cover; object-position: center;
+  opacity: .82; pointer-events: none; transform: translateZ(0); will-change: transform;
 }
+.bg-overlay {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden;
+  background: linear-gradient(180deg, rgba(8,8,22,.30) 0%, rgba(8,8,22,.16) 40%, rgba(8,8,22,.72) 100%);
+}
+.bg-aura {
+  position: absolute; left: -20%; top: -35%; width: 140vw; height: 90vh;
+  background:
+    radial-gradient(45% 55% at 28% 35%, rgba(168,107,255,.34), transparent 72%),
+    radial-gradient(40% 48% at 72% 20%, rgba(98,86,255,.26), transparent 74%),
+    radial-gradient(35% 45% at 52% 60%, rgba(208,120,255,.16), transparent 76%);
+  filter: blur(38px); transform: translate3d(0,0,0) scale(1.05);
+  animation: nvAuraFloat 18s ease-in-out infinite alternate; will-change: transform, opacity;
+}
+@keyframes nvAuraFloat {
+  0% { transform: translate3d(-3%,-2%,0) scale(1.05); opacity:.85; }
+  50% { transform: translate3d(4%,3%,0) scale(1.12); opacity:1; }
+  100% { transform: translate3d(-2%,5%,0) scale(1.08); opacity:.9; }
+}
+@media (prefers-reduced-motion: reduce) { .bg-aura { animation: none; } }
 .particles-canvas {
   position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.35;
 }
@@ -341,7 +361,8 @@ input, textarea { font-size: 16px; } /* iOS не зумит страницу п�
 .bg-photo {
     position: fixed;
     inset: -60px;
-    z-index: -1;
+    z-index: -2;
+    opacity: .22;
     background-color: #0b1020;
     background-image: url('/bg.png');
     background-size: cover;

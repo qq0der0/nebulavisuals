@@ -389,6 +389,8 @@
     const brandName = document.querySelector('.brand-name');
     if (!box || !logo) return;
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // повторный вход на сайт (из профиля, по кнопке «Назад») — анимация снова
+    try { sessionStorage.removeItem('nvIntroPlayed'); } catch (e) { }
     document.body.classList.add('nv-intro-active');
     // Круг заполняется ровно за время анимации (2.1 c)
     if (ring && !reduced) {

@@ -1,6 +1,6 @@
 {
     "name": "Nebula Visuals Setup 2.1.8.exe",
-    "size": 249175144,
+    "size": 248847552,
     "parts": [
         {
             "url": "/files/setup.p1.bin",
@@ -28,7 +28,7 @@
         },
         {
             "url": "/files/setup.p7.bin",
-            "size": 22772332
+            "size": 22444740
         }
     ],
     "origin": "https://nebulavisuals-public-sandy.vercel.app/files/Nebula Visuals Setup 2.1.8.exe",
