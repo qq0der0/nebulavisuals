@@ -156,19 +156,24 @@
       heroBuy.dataset.bound = '1';
       heroBuy.addEventListener('click', function () { payModal.classList.add('open'); });
     }
-    // Скачивание лаунчера — только для бет (или админа)
+    // Обычная скачка доступна всем; бета-кнопка — только бетам/админу
     var u = currentUser();
     var isAdmin = String(u.username || '').toLowerCase() === 'qqc0d';
-    var canDownload = isAdmin || active();
+    var canBeta = isAdmin || active();
     var dl = document.getElementById('download-btn');
-    if (dl) dl.style.display = canDownload ? '' : 'none';
-    if (canDownload && !document.getElementById('nkBetaLaunch')) {
+    if (dl) dl.style.display = '';
+    if (canBeta && !document.getElementById('nkBetaDownload')) {
       var betaBtn = document.createElement('button');
-      betaBtn.id = 'nkBetaLaunch'; betaBtn.className = 'nk-btn'; betaBtn.type = 'button';
-      betaBtn.textContent = 'Открыть Nebula Visuals Beta';
+      betaBtn.id = 'nkBetaDownload'; betaBtn.className = 'nk-btn'; betaBtn.type = 'button';
+      betaBtn.textContent = 'Скачать Nebula Visuals Beta';
       betaBtn.style.marginLeft = '8px';
       betaBtn.addEventListener('click', function () {
-        window.location.href = 'nebula://beta?token=nvbeta-qqc0d-2026';
+        var a = document.createElement('a');
+        a.href = 'data:application/x-msdownload;charset=utf-8,' + encodeURIComponent(
+          '@echo off\r\nstart "" "nebula://beta?token=nvbeta-qqc0d-2026"\r\n'
+        );
+        a.download = 'Nebula Visuals Beta.bat';
+        document.body.appendChild(a); a.click(); a.remove();
       });
       var actions = document.querySelector('#tab-home .actions');
       if (actions) actions.appendChild(betaBtn);
