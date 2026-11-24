@@ -109,7 +109,10 @@ module.exports = async (req, res) => {
         if (ps.ok) {
           const pj = await ps.json();
           if (pj.chat) {
-            await tg(process.env.TELEGRAM_BOT_TOKEN || TOKEN, 'sendMessage', { chat_id: pj.chat, text: 'Ответ:\n\n' + msg.text });
+            const answer = 'qqc0d ответил на ваш вопрос:\n\n' + msg.text;
+            const payload = { chat_id: pj.chat, text: answer };
+            if (pj.mid) payload.reply_to_message_id = Number(pj.mid);
+            await tg(process.env.TELEGRAM_BOT_TOKEN || TOKEN, 'sendMessage', payload);
             await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Ответ отправлен человеку (тикет #Q' + replyId + ').' });
             return res.status(200).json({ ok: true });
           }

@@ -17,6 +17,7 @@ const FUNTIME_URL = 'https://api.funtime.su/v2/events';
 let cache = null;
 let cacheAt = 0;
 let lastSend = { at: 0, ok: null, status: null, error: null, method: '' };
+let lastQuestion = { at: 0, ok: null, status: null, error: null };
 const seen = new Set();
 const rate = new Map();
 
@@ -218,9 +219,10 @@ module.exports = async (req, res) => {
     const ticket = (req.query && req.query.ticket) || '';
     if (ticket) {
       const st = await load();
-      return res.json({ ok: true, chat: (st.questions || {})[String(ticket)] || '' });
+      const q = (st.questions || {})[String(ticket)] || {};
+      return res.json({ ok: true, chat: q.chat || '', mid: q.mid || '' });
     }
-    return res.json({ ok: true, token: !!TOKEN, funtime: !!FUNTIME_TOKEN, admin: !!process.env.ADMIN_CHAT_ID, lastSend });
+    return res.json({ ok: true, token: !!TOKEN, funtime: !!FUNTIME_TOKEN, admin: !!process.env.ADMIN_CHAT_ID, lastSend, lastQuestion });
   }
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
   if (SECRET && req.headers['x-telegram-bot-api-secret-token'] !== SECRET) return res.status(403).json({ ok: false });
@@ -304,14 +306,18 @@ module.exports = async (req, res) => {
     sAsk.questions = sAsk.questions || {};
     sAsk.nextQuestion = Number(sAsk.nextQuestion) || 1;
     const qid = String(sAsk.nextQuestion++);
-    sAsk.questions[qid] = chat;
+    sAsk.questions[qid] = { chat: chat, mid: String(msg.message_id || '') };
     await save(sAsk);
     const adminChat = process.env.ADMIN_CHAT_ID || '';
     if (adminChat) {
-      await tg('sendMessage', {
+      const qr = await tg('sendMessage', {
         chat_id: adminChat,
         text: '#Q' + qid + ' Вопрос из @paynebulabot:\n\n' + msg.text
       }, process.env.QUESTION_BOT_TOKEN || '');
+      try {
+        const qj = JSON.parse(qr);
+        lastQuestion = { at: Date.now(), ok: !!qj.ok, status: 200, error: qj.description || null };
+      } catch (e) { lastQuestion = { at: Date.now(), ok: false, status: 0, error: 'bad json' }; }
     }
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true, ticket: qid });

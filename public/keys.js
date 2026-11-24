@@ -129,7 +129,6 @@
     var targets = [];
     var prof = document.getElementById('sub-status');
     if (prof) targets.push(prof);
-    document.querySelectorAll('.js-sub-status').forEach(function (x) { targets.push(x); });
     if (!targets.length) return;
     var html = '';
     var u = currentUser();
@@ -151,6 +150,11 @@
     if (keyBtn && !keyBtn.dataset.bound) {
       keyBtn.dataset.bound = '1';
       keyBtn.addEventListener('click', function () { keyModal.classList.add('open'); setTimeout(function(){document.getElementById('nkKeyInput').focus();},60); });
+    }
+    var heroBuy = document.getElementById('nkHeroBuy');
+    if (heroBuy && !heroBuy.dataset.bound) {
+      heroBuy.dataset.bound = '1';
+      heroBuy.addEventListener('click', function () { payModal.classList.add('open'); });
     }
     var home = document.getElementById('tab-home');
     if (home && !document.getElementById('nkPayHome')) {
