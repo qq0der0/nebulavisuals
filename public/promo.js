@@ -136,17 +136,6 @@
       setTimeout(function () { document.getElementById('nvPromoInput').focus(); }, 60);
     },
     addButtons: function () {
-      var topbar = document.querySelector('.topbar, .nav-inner');
-      if (topbar && !document.getElementById('nvPromoTopBtn')) {
-        var b = document.createElement('button');
-        b.id = 'nvPromoTopBtn';
-        b.className = 'nv-buy-btn';
-        b.type = 'button';
-        b.textContent = 'Ввести промокод';
-        b.style.marginLeft = '8px';
-        b.addEventListener('click', function () { window.NebulaPromo.open('code'); });
-        topbar.appendChild(b);
-      }
       var hero = document.querySelector('.hero-buttons, .actions');
       if (hero && !document.getElementById('nvBuyBtn')) {
         var buy = document.createElement('button');
