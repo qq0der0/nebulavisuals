@@ -1,60 +1,63 @@
 // Telegram Bot @paynebulabot — подарки/звёзды → ключ.
 // Защита: secret-token, лимит запросов, дедуп update_id, лимит размера.
 const https = require('https');
+let blob = null;
+try { blob = require('@vercel/blob'); } catch (e) { blob = null; }
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || '';
-const GOAL = 150;
-const BLOB_URL = 'https://blob.vercel-storage.com/nebula/paynebula-state.json';
+const GOAL = 125;
+const BLOB_PATH = 'nebula/paynebula-state.json';
 const KEYS_URL = 'https://nebulavisuals-public-sandy.vercel.app/keys.json';
 
 let cache = null;
 let cacheAt = 0;
 const seen = new Set();
-const rate = new Map(); // chatId -> [ts,...]
+const rate = new Map();
 
 function blocked(chatId) {
   const now = Date.now();
   const arr = (rate.get(chatId) || []).filter(t => now - t < 10000);
   if (arr.length >= 5) { rate.set(chatId, arr); return true; }
-  arr.push(now); rate.set(chatId, arr);
-  return false;
+  arr.push(now); rate.set(chatId, arr); return false;
 }
 function tg(method, payload) {
   return new Promise((res) => {
     const data = Buffer.from(JSON.stringify(payload));
-    const r = https.request({
-      hostname: 'api.telegram.org', method: 'POST',
+    const r = https.request({ hostname: 'api.telegram.org', method: 'POST',
       path: '/bot' + TOKEN + '/' + method,
       headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
-    }, (resp) => { let b = ''; resp.on('data', c => b += c); resp.on('end', () => res(b)); });
-    r.on('error', () => res('')); r.write(data); r.end();
+    }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>res(b)); });
+    r.on('error',()=>res('')); r.write(data); r.end();
   });
 }
 async function load() {
-  if (cache && Date.now() - cacheAt < 5000) return cache;
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return cache || { stars: {}, issued: {} };
+  if (cache && Date.now() - cacheAt < 4000) return cache;
   try {
-    const r = await fetch(BLOB_URL, { headers: { Authorization: 'Bearer ' + token, 'x-api-version': '1', 'x-blob-access': 'private' } });
-    if (r.ok) { cache = await r.json(); cacheAt = Date.now(); }
+    if (blob && process.env.BLOB_READ_WRITE_TOKEN) {
+      const res = await blob.get(BLOB_PATH, { access: 'private' });
+      if (res && res.stream) { cache = JSON.parse(await new Response(res.stream).text()); cacheAt = Date.now(); }
+    } else {
+      const r = await fetch('https://blob.vercel-storage.com/' + BLOB_PATH, {
+        headers: { Authorization: 'Bearer ' + process.env.BLOB_READ_WRITE_TOKEN, 'x-api-version': '1', 'x-blob-access': 'private' }
+      });
+      if (r.ok) { cache = await r.json(); cacheAt = Date.now(); }
+    }
   } catch (e) {}
   return cache || { stars: {}, issued: {} };
 }
 async function save(s) {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return;
   try {
-    await fetch(BLOB_URL, {
-      method: 'PUT',
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'x-api-version': '1', 'x-blob-access': 'private',
-        'x-blob-add-random-suffix': '0', 'x-blob-allow-overwrite': '1',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(s)
-    });
+    if (blob && process.env.BLOB_READ_WRITE_TOKEN) {
+      await blob.put(BLOB_PATH, JSON.stringify(s), { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
+    } else {
+      await fetch('https://blob.vercel-storage.com/' + BLOB_PATH, {
+        method: 'PUT',
+        headers: { Authorization: 'Bearer ' + process.env.BLOB_READ_WRITE_TOKEN, 'x-api-version': '1',
+          'x-blob-access': 'private', 'x-blob-add-random-suffix': '0', 'x-blob-allow-overwrite': '1', 'Content-Type': 'application/json' },
+        body: JSON.stringify(s)
+      });
+    }
   } catch (e) {}
   cache = s; cacheAt = Date.now();
 }
@@ -94,14 +97,11 @@ module.exports = async (req, res) => {
   let text = 'Получено ' + got + ' ⭐. Всего: ' + have + '/' + GOAL + '. ';
   if (have >= GOAL && !s.issued[chat]) {
     try {
-      const r = await fetch(KEYS_URL);
-      const keys = await r.json();
+      const r = await fetch(KEYS_URL); const keys = await r.json();
       const used = new Set(Object.values(s.issued));
       const key = keys.find(k => !used.has(k));
-      if (key) {
-        s.issued[chat] = key;
-        text += '🎉 Ключ: ' + key;
-      } else text += 'Ключей пока нет.';
+      if (key) { s.issued[chat] = key; text += '🎉 Ключ: ' + key; }
+      else text += 'Ключей пока нет.';
     } catch (e) { text += 'Не удалось получить ключ.'; }
   } else if (s.issued[chat]) {
     text += 'Ваш ключ: ' + s.issued[chat];

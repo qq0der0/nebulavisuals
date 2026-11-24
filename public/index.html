@@ -283,12 +283,15 @@ header.nav .nav-profile-avatar { box-shadow:0 0 0 2px rgba(169,132,255,.5), 0 0 
   header.nav .nav-profile-name { display:inline !important; font-size:12px !important; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 }
 /* ===== Финал: бренд не наезжает на меню ===== */
-header.nav .nav-inner { max-width:none !important; width:100% !important; padding:7px 12px !important; gap:12px !important; }
-header.nav .brand { margin-left:0 !important; margin-right:12px !important; gap:8px !important; }
-header.nav .brand-name { font-size:15px !important; }
-header.nav .nav-links { gap:4px !important; }
-header.nav .nav-links a { padding:7px 9px !important; font-size:13px !important; }
-header.nav .nav-right { gap:7px !important; }
+header.nav .nav-inner { max-width:none !important; width:100% !important; min-height:44px !important; padding:4px 12px !important; gap:10px !important; }
+header.nav .brand { margin-left:0 !important; margin-right:10px !important; gap:7px !important; }
+header.nav .brand-logo-icon { width:28px !important; height:28px !important; }
+header.nav .brand-name { font-size:13px !important; }
+header.nav .nav-links { gap:3px !important; }
+header.nav .nav-links a { padding:5px 8px !important; font-size:12px !important; }
+header.nav .nav-right { gap:6px !important; }
+header.nav .nav-support, header.nav .nav-tg, header.nav .nav-auth, header.nav .nav-profile-link { min-height:32px !important; height:32px !important; }
+header.nav .nav-support-text { font-size:11px !important; }
 @media (max-width:1150px) {
   header.nav .nav-links a:nth-child(n+5) { display:none !important; }
 }
@@ -325,8 +328,8 @@ header.nav .nav-right { gap:7px !important; }
       <a href="#features">Возможности</a>
       <a href="#server">Сервер в моде</a>
       <a href="#screens">Скриншоты</a>
-      <a href="#chat">Чат</a>
-      <a href="#faq">Вопросы</a>
+      <a href="#about">О нас</a>
+      <a href="https://t.me/NebulaQuestionbot?start=question" target="_blank" rel="noopener">Задать вопрос</a>
     </nav>
     <!-- Right side: Support + Telegram + Auth/Profile -->
     <div class="nav-right">
@@ -379,8 +382,8 @@ header.nav .nav-right { gap:7px !important; }
   <a href="#features">Возможности</a>
   <a href="#server">Сервер в моде</a>
   <a href="#screens">Скриншоты</a>
-  <a href="#chat">Чат</a>
-  <a href="#faq">Вопросы</a>
+  <a href="#about">О нас</a>
+  <a href="https://t.me/NebulaQuestionbot?start=question" target="_blank" rel="noopener">Задать вопрос</a>
   <a class="nav-m-support" href="https://funpay.com/users/16569412/" target="_blank" rel="noopener">♥&nbsp;&nbsp;Поддержать автора</a>
 </div>
 
@@ -535,6 +538,15 @@ header.nav .nav-right { gap:7px !important; }
         </iframe>
       </div>
       <div class="video-caption">Обзор на Nebula Visuals</div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-header">
+      <div class="section-tag">О нас</div>
+      <h2 class="section-title">Nebula Visuals</h2>
+      <p class="section-sub">Клиент для Minecraft с визуальными эффектами, стабильным FPS и умной оптимизацией. Один лаунчер — и игра обновляется сама. Есть вопросы? Напишите в бот @NebulaQuestionbot.</p>
     </div>
   </section>
 
