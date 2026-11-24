@@ -206,11 +206,11 @@
     // сохранение (проводник), без страницы-посредника
     const dl = document.getElementById('download-btn');
     if (dl) dl.addEventListener('click', () => {
-      const url = 'https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.7/Nebula.Visuals.Setup.2.1.7.exe';
+      const url = 'https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.8/Nebula.Visuals.Setup.2.1.8.exe';
       const a = document.createElement('a');
       a.href = url;
       a.rel = 'noopener';
-      a.download = 'Nebula Visuals Setup 2.1.7.exe';
+      a.download = 'Nebula Visuals Setup 2.1.8.exe';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

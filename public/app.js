@@ -1220,7 +1220,7 @@
      прозрачный откат на прямую ссылку GitHub. */
   const DL = {
     manifestUrl: '/files/setup.manifest.json',
-    fallbackUrl: 'https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.7/Nebula.Visuals.Setup.2.1.7.exe',
+    fallbackUrl: 'https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.8/Nebula.Visuals.Setup.2.1.8.exe',
     streams: 6,
     running: false,
     cancelled: false,
@@ -1233,7 +1233,7 @@
     const box = document.createElement('div');
     box.className = 'dl-progress';
     box.innerHTML =
-      '<div class="dl-progress-title">Скачиваем установщик…</div>' +
+      '<div class="dl-progress-head"><div class="dl-progress-spinner"></div><div class="dl-progress-title">Скачиваем установщик…</div></div>' +
       '<div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>' +
       '<div class="dl-progress-meta">' +
         '<span class="dl-progress-pct">0%</span>' +
@@ -1303,10 +1303,26 @@
   async function smartDownload(ev) {
     if (ev) ev.preventDefault();
     if (DL.running) return false;
-    DL.running = true; DL.cancelled = false; DL.controllers = [];
+    DL.running = true;
+    // Сначала выбираем папку — установщик сохранится именно туда
+    let dirHandle = null;
+    if (window.showDirectoryPicker) {
+      try {
+        dirHandle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'nebula-setup', startIn: 'downloads' });
+      } catch (e) {
+        if (e && e.name === 'AbortError') { DL.running = false; return false; } // передумали — отменяем
+        dirHandle = null; // нет доступа — сохраним в «Загрузки» как раньше
+      }
+    }
+    DL.cancelled = false; DL.controllers = [];
     const box = dlUI();
     box.classList.add('visible');
+    const spin = box.querySelector('.dl-progress-spinner');
+    if (spin) spin.style.display = '';
     box.querySelector('.dl-progress-title').textContent = 'Скачиваем установщик…';
+    box.querySelector('.dl-progress-note').textContent = dirHandle
+      ? ('Папка: «' + dirHandle.name + '» — файл сохранится туда. Не закрывайте сайт до завершения.')
+      : 'Загрузка идёт в несколько потоков с быстрого CDN — обычно заметно быстрее, чем напрямую. Не закрывайте сайт до завершения.';
     try {
       const mres = await fetch(DL.manifestUrl, { cache: 'no-store' });
       if (!mres.ok) throw new Error('манифест недоступен');
@@ -1348,18 +1364,38 @@
       if (DL.cancelled) throw new Error('cancelled');
       dlRender(m.size, m.size, t0);
       const blob = new Blob(buffers, { type: 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = m.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 120000);
+      let savedTo = '';
+      if (dirHandle) {
+        // пишем файл сразу в выбранную папку
+        try {
+          const fh = await dirHandle.getFileHandle(m.name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(blob);
+          await w.close();
+          savedTo = dirHandle.name;
+        } catch (e) {
+          console.error('folder write failed, fallback to downloads', e);
+          dirHandle = null;
+        }
+      }
+      if (!dirHandle) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = m.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 120000);
+      }
+      if (spin) spin.style.display = 'none';
       box.querySelector('.dl-progress-title').textContent = 'Готово — установщик скачан ✓';
-      box.querySelector('.dl-progress-info').textContent = 'файл сохранён в загрузки';
+      box.querySelector('.dl-progress-info').textContent = savedTo
+        ? ('сохранено в папку «' + savedTo + '»')
+        : 'файл сохранён в загрузки';
       setTimeout(() => box.classList.remove('visible'), 6000);
     } catch (err) {
+      if (spin) spin.style.display = 'none';
       if (err && err.message === 'cancelled') {
         box.classList.remove('visible');
       } else {

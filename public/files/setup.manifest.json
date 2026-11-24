@@ -1,37 +1,37 @@
 {
-    "name":  "Nebula Visuals Setup 2.1.7.exe",
-    "size":  249167440,
-    "parts":  [
-                  {
-                      "url":  "/files/setup.p1.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p2.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p3.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p4.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p5.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p6.bin",
-                      "size":  37733802
-                  },
-                  {
-                      "url":  "/files/setup.p7.bin",
-                      "size":  22764628
-                  }
-              ],
-    "origin":  "https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.7/Nebula.Visuals.Setup.2.1.7.exe",
-    "rawBase":  "https://raw.githubusercontent.com/qq0der0/nebulavisuals/main",
-    "jsdelivrBase":  "https://cdn.jsdelivr.net/gh/qq0der0/nebulavisuals@main"
+    "name": "Nebula Visuals Setup 2.1.8.exe",
+    "size": 249175144,
+    "parts": [
+        {
+            "url": "/files/setup.p1.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p2.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p3.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p4.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p5.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p6.bin",
+            "size": 37733802
+        },
+        {
+            "url": "/files/setup.p7.bin",
+            "size": 22772332
+        }
+    ],
+    "origin": "https://nebulavisuals-public-sandy.vercel.app/files/Nebula Visuals Setup 2.1.8.exe",
+    "rawBase": "https://nebulavisuals-public-sandy.vercel.app",
+    "jsdelivrBase": "https://nebulavisuals-public-sandy.vercel.app"
 }
