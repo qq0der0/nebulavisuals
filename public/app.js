@@ -4,6 +4,18 @@
 (function () {
   'use strict';
 
+  // убираем тестовый параметр ?v=... из адреса — остаётся чистый URL сайта
+  try {
+    const u = new URL(window.location.href);
+    let changed = false;
+    if (u.searchParams.has('v')) { u.searchParams.delete('v'); changed = true; }
+    if (/\/index\.html$/.test(u.pathname)) { u.pathname = u.pathname.replace(/\/index\.html$/, '/'); changed = true; }
+    if (changed) {
+      const clean = u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '') + u.hash;
+      window.history.replaceState(null, '', clean);
+    }
+  } catch (e) {}
+
   /* ================= AUTH STATE ================= */
   const USERS_KEY = 'nebula_users';
   const AUTH_KEY = 'nebula_auth';
@@ -150,14 +162,17 @@
 
       if (u) {
         if (navAuth) navAuth.style.display = 'none';
-        if (navProfile) navProfile.style.display = 'none';
+        if (navProfile) navProfile.style.display = 'flex';
         // avatar: show image if set, else logo
         const avImg = document.getElementById('nav-avatar-img');
         if (avImg) avImg.src = myAvatarFull() || '/avatar-nebula.png';
         setText('nav-profile-name', u.username);
       } else {
         if (navAuth) navAuth.style.display = 'flex';
-        if (navProfile) navProfile.style.display = 'none';
+        if (navProfile) {
+          navProfile.style.display = 'flex';
+          setText('nav-profile-name', 'Профиль');
+        }
       }
       // уведомить чат о смене авторизации
       try { window.dispatchEvent(new CustomEvent('auth-changed')); } catch (e) {}
@@ -566,11 +581,14 @@
   }
 
   /* ================= PROFILE ================= */
-  // profiling отключён: всегда остаёмся на главной
   const navProfileLink = document.getElementById('nav-profile-link');
   if (navProfileLink) {
-    navProfileLink.style.display = 'none';
-    navProfileLink.setAttribute('href', '/');
+    navProfileLink.removeAttribute('style');
+    navProfileLink.style.display = 'flex';
+    navProfileLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = '/profile.html';
+    });
   }
 
   /* ================= CHAT (ntfy.sh — общий онлайн-чат) ================= */
