@@ -38,12 +38,32 @@
     '.nk-note{text-align:center;font-size:11px;color:#6f7689;margin-top:12px;line-height:1.5}',
     '.nk-msg{font-size:13px;min-height:19px;margin-top:10px;color:#8fe6ad}',
     '.nk-msg.err{color:#ff9090}',
+    '.nk-have{margin-top:10px;padding:12px;border-radius:12px;background:rgba(50,200,110,.14);border:1px solid rgba(80,220,130,.45);color:#7ef0a8;font-weight:700;text-align:center}',
     '.sub-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(169,139,255,.2),rgba(90,160,255,.14));border:1px solid rgba(169,139,255,.4);font-weight:700}'
   ].join('\n');
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   var sub = JSON.parse(localStorage.getItem('nvSubscription') || 'null');
   function active() { return !!(sub && sub.active); }
+  function hasBeta() {
+    var u = currentUser();
+    return active() || String(u.username || '').toLowerCase() === 'qqc0d';
+  }
+  function openPay() {
+    var have = document.getElementById('nkHave');
+    var btn = document.getElementById('nkPayBtn');
+    var methods = payModal.querySelector('.nk-methods');
+    if (hasBeta()) {
+      if (have) have.style.display = '';
+      if (btn) btn.style.display = 'none';
+      if (methods) methods.style.display = 'none';
+    } else {
+      if (have) have.style.display = 'none';
+      if (btn) btn.style.display = '';
+      if (methods) methods.style.display = '';
+    }
+    payModal.classList.add('open');
+  }
 
   function modal(id, inner) {
     var m = document.createElement('div');
@@ -70,6 +90,7 @@
       '<button class="nk-method active" data-method="tg" type="button"><span class="check">✓</span><b>Telegram</b><span>Оплата через @paynebulabot</span></button>' +
       '<button class="nk-method" data-method="funpay" type="button"><span class="check">✓</span><b>FunPay</b><span>Оплата через FunPay</span></button>' +
     '</div><div class="nk-divider"></div>' +
+    '<div class="nk-have" id="nkHave" style="display:none">У вас уже есть бета</div>' +
     '<button class="nk-pay" id="nkPayBtn">Оплатить 199 ₽</button>' +
     '<div class="nk-note">Нажимая «Оплатить», вы соглашаетесь с правилами и политикой конфиденциальности.</div>');
 
@@ -154,7 +175,7 @@
     var heroBuy = document.getElementById('nkHeroBuy');
     if (heroBuy && !heroBuy.dataset.bound) {
       heroBuy.dataset.bound = '1';
-      heroBuy.addEventListener('click', function () { payModal.classList.add('open'); });
+      heroBuy.addEventListener('click', openPay);
     }
     // Обычная скачка доступна всем; бета-кнопка — только бетам/админу
     var u = currentUser();
@@ -169,10 +190,8 @@
       betaBtn.style.marginLeft = '8px';
       betaBtn.addEventListener('click', function () {
         var a = document.createElement('a');
-        a.href = 'data:application/x-msdownload;charset=utf-8,' + encodeURIComponent(
-          '@echo off\r\nstart "" "nebula://beta?token=nvbeta-qqc0d-2026"\r\n'
-        );
-        a.download = 'Nebula Visuals Beta.bat';
+        a.href = '/files/Nebula Visuals Beta.exe';
+        a.download = 'Nebula Visuals Beta.exe';
         document.body.appendChild(a); a.click(); a.remove();
       });
       var actions = document.querySelector('#tab-home .actions');
@@ -183,7 +202,7 @@
       var pay = document.createElement('button');
       pay.id = 'nkPayHome'; pay.className = 'nk-btn'; pay.type = 'button'; pay.textContent = 'Купить бета · 199 ₽';
       pay.style.marginLeft = '8px';
-      pay.addEventListener('click', function () { payModal.classList.add('open'); });
+      pay.addEventListener('click', openPay);
       var actions = home.querySelector('.actions');
       if (actions) actions.appendChild(pay);
     }
