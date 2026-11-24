@@ -64,14 +64,19 @@ module.exports = async (req, res) => {
   if (!chat || blocked(chat)) return res.status(200).json({ ok: true });
   const s = await load();
 
-  //管理员自己 — запоминаем его чат и обрабатываем ответы по Reply
-  if (ADMIN && chat === ADMIN) {
+  // Личный ящик: все вопросы приходят сюда из @paynebulabot.
+  const OWNER = String(ADMIN || process.env.ADMIN_CHAT_ID || s.adminChat || '');
+  const isOwner = OWNER && chat === OWNER;
+
+  if (isOwner) {
     const replyId = parseId(msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption));
     if (replyId && msg.text) {
       const t = s.tickets[replyId];
       if (t) {
-        await tg(TOKEN, 'sendMessage', { chat_id: t.chat, text: 'Ответ администратора:\n\n' + msg.text });
-        await tg(TOKEN, 'sendMessage', { chat: chat, text: 'Ответ отправлен человеку (тикет #Q' + replyId + ').' });
+        await tg(TOKEN, 'sendMessage', { chat_id: t.chat, text: 'Ответ:\n\n' + msg.text });
+        await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Ответ отправлен человеку (тикет #Q' + replyId + ').' });
+        delete s.tickets[replyId];
+        await save(s);
       } else {
         await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Тикет #Q' + replyId + ' не найден.' });
       }
@@ -80,13 +85,9 @@ module.exports = async (req, res) => {
   }
 
   if (msg.text && msg.text.startsWith('/start')) {
-    if (!s.adminChat) {
-      s.adminChat = chat;
-      await save(s);
-      await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Вы администратор. Вопросы пользователей приходят сюда. Чтобы ответить — нажмите «Ответить» на сообщение с тикетом.' });
-    } else {
-      await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Здравствуйте! Напишите ваш вопрос — он придёт администратору, а ответ вернётся сюда.' });
-    }
+    if (!s.adminChat) { s.adminChat = chat; await save(s); }
+    await tg(TOKEN, 'sendMessage', { chat_id: chat,
+      text: 'Этот бот только для вас. Все вопросы из @paynebulabot приходят сюда. Чтобы ответить — нажмите «Ответить» на сообщение с тикетом.' });
     return res.status(200).json({ ok: true });
   }
 
@@ -95,11 +96,11 @@ module.exports = async (req, res) => {
     s.next = (Number(s.next) || 1) + 1;
     s.tickets[id] = { chat: chat, text: msg.text, ts: Date.now() };
     await save(s);
-    const adminChat = ADMIN || s.adminChat;
+    const adminChat = ADMIN || process.env.ADMIN_CHAT_ID || s.adminChat;
     if (adminChat) {
       await tg(TOKEN, 'sendMessage', {
         chat_id: adminChat,
-        text: 'Новый вопрос #Q' + id + ' от ' + (msg.from && (msg.from.username ? '@'+msg.from.username : msg.from.first_name) || 'пользователя') + ':\n\n' + msg.text
+        text: 'Вопрос #Q' + id + ' от ' + (msg.from && (msg.from.username ? '@'+msg.from.username : msg.from.first_name) || 'пользователя') + ':\n\n' + msg.text
       });
     }
     await tg(TOKEN, 'sendMessage', { chat_id: chat, text: 'Вопрос отправлен. Ожидайте ответа — он придёт в этот бот.' });

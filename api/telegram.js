@@ -19,11 +19,32 @@ let cacheAt = 0;
 const seen = new Set();
 const rate = new Map();
 
-function blocked(chatId) {
+function blocked(chatId, text) {
+  // кнопки меню не ограничиваем
+  if (text && /^(Купить|О нас|Задать вопрос|Промокод|Ближайшие ивенты|Текущие ивенты|\/start)$/.test(text)) return false;
   const now = Date.now();
   const arr = (rate.get(chatId) || []).filter(t => now - t < 10000);
-  if (arr.length >= 5) { rate.set(chatId, arr); return true; }
+  if (arr.length >= 20) { rate.set(chatId, arr); return true; }
   arr.push(now); rate.set(chatId, arr); return false;
+}
+// Telegram: максимум 4096 символов на сообщение — режем на части
+async function sendLong(chat, text, markup) {
+  const limit = 3800;
+  const chunks = [];
+  let rest = String(text || '');
+  while (rest.length > limit) {
+    let cut = rest.lastIndexOf('\n', limit);
+    if (cut < limit / 2) cut = limit;
+    chunks.push(rest.slice(0, cut));
+    rest = rest.slice(cut).replace(/^\n/, '');
+  }
+  chunks.push(rest);
+  for (let i = 0; i < chunks.length; i++) {
+    const payload = { chat_id: chat, text: chunks[i] || '…', disable_web_page_preview: true };
+    if (markup && i === chunks.length - 1) payload.reply_markup = markup;
+    await tg('sendMessage', payload);
+  }
+  return chunks.length;
 }
 function tg(method, payload) {
   return new Promise((res) => {
@@ -31,7 +52,10 @@ function tg(method, payload) {
     const r = https.request({ hostname: 'api.telegram.org', method: 'POST',
       path: '/bot' + TOKEN + '/' + method,
       headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
-    }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>res(b)); });
+    }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>{
+      try { const j=JSON.parse(b); if (!j.ok) console.error('Telegram error:', j.error_code, j.description); } catch(e) {}
+      res(b);
+    }); });
     r.on('error',()=>res('')); r.write(data); r.end();
   });
 }
@@ -160,7 +184,7 @@ module.exports = async (req, res) => {
 
   const msg = upd.message || upd.channel_post || {};
   const chat = String((msg.chat && msg.chat.id) || '');
-  if (!chat || blocked(chat)) return res.status(200).json({ ok: true });
+  if (!chat || blocked(chat, msg.text)) return res.status(200).json({ ok: true });
 
   //实时 ивенты: пересланные сообщения от @deltaclient_bot или сообщения в группе
   const evText = msg.text || msg.caption || '';
@@ -168,7 +192,7 @@ module.exports = async (req, res) => {
     const parsed = parseEvents(evText);
     if (parsed) {
       await saveEvents(parsed);
-      await tg('sendMessage', { chat_id: chat, text: '✅ Ивенты обновлены в реальном времени.\n\n' + formatEvents(parsed) });
+      await sendLong(chat, '✅ Ивенты обновлены в реальном времени.\n\n' + formatEvents(parsed));
       return res.status(200).json({ ok: true, events: parsed.current.length });
     }
   }
@@ -219,7 +243,7 @@ module.exports = async (req, res) => {
         text = 'Не удалось загрузить список ивентов.';
       }
     }
-    await tg('sendMessage', { chat_id: chat, text: text, reply_markup: keyboard, disable_web_page_preview: true });
+    await sendLong(chat, text, keyboard);
     return res.status(200).json({ ok: true });
   }
   // вопрос из этого бота → админ-боту
