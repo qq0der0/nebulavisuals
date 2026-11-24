@@ -69,10 +69,7 @@
     '<div class="nk-methods">' +
       '<button class="nk-method active" data-method="tg" type="button"><span class="check">✓</span><b>Telegram</b><span>Оплата через @paynebulabot</span></button>' +
       '<button class="nk-method" data-method="funpay" type="button"><span class="check">✓</span><b>FunPay</b><span>Оплата через FunPay</span></button>' +
-    '</div><div class="nk-divider"></div><div class="nk-label">Промокод</div>' +
-    '<div class="nk-row"><input class="nk-input" id="nkPromo" placeholder="Введите промокод">' +
-    '<button class="nk-small" id="nkPromoApply">Применить</button></div>' +
-    '<div class="nk-msg" id="nkPromoMsg"></div>' +
+    '</div><div class="nk-divider"></div>' +
     '<button class="nk-pay" id="nkPayBtn">Оплатить 199 ₽</button>' +
     '<div class="nk-note">Нажимая «Оплатить», вы соглашаетесь с правилами и политикой конфиденциальности.</div>');
 
@@ -92,13 +89,6 @@
       b.classList.add('active'); method = b.dataset.method;
     });
   });
-  document.getElementById('nkPromoApply').addEventListener('click', function () {
-    var v = document.getElementById('nkPromo').value.trim().toLowerCase();
-    var p = PROMOS[v];
-    var msg = document.getElementById('nkPromoMsg');
-    if (p) { discount = p.d; msg.className = 'nk-msg'; msg.textContent = p.label; renderPrice(); }
-    else { msg.className = 'nk-msg err'; msg.textContent = 'Промокод не найден'; }
-  });
   document.getElementById('nkPayBtn').addEventListener('click', function () {
     window.open(method === 'funpay' ? FUNPAY : TELEGRAM, '_blank', 'noopener');
   });
@@ -111,7 +101,11 @@
     if (active()) { msg.className = 'nk-msg err'; msg.textContent = 'У вас уже есть подписка'; return; }
     var used = JSON.parse(localStorage.getItem('nvUsedKeys') || '[]');
     if (used.indexOf(inp) !== -1) { msg.className = 'nk-msg err'; msg.textContent = 'Этот ключ уже был использован!'; return; }
-    fetch('/keys.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (keys) {
+    Promise.all([
+      fetch('/keys.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
+      fetch('/keys-tg.json', { cache: 'no-store' }).then(function (r) { return r.json(); })
+    ]).then(function (arr) {
+      const keys = arr[0].concat(arr[1]);
       if (keys.indexOf(inp) === -1) {
         msg.className = 'nk-msg err';
         msg.textContent = inp.indexOf('NEBULAVISUALS_') === 0 ? 'Ключ не найден' : 'Ключ должен начинаться с NebulaVisuals_';
@@ -128,16 +122,32 @@
   document.getElementById('nkKeyApply').addEventListener('click', keyApply);
   document.getElementById('nkKeyInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') keyApply(); });
 
+  function currentUser() {
+    try { return JSON.parse(localStorage.getItem('nebula_auth') || 'null') || {}; } catch (e) { return {}; }
+  }
   function renderSub() {
-    var el = document.getElementById('sub-status');
-    if (!el) return;
-    if (active()) {
-      el.innerHTML = '<span class="sub-badge">✅ Бета: навсегда · ключ ' + String(sub.key || '').slice(0, 22) + '…</span>' +
-        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Дней осталось: ∞ · подписка активна</div>';
+    var targets = [];
+    var prof = document.getElementById('sub-status');
+    if (prof) targets.push(prof);
+    document.querySelectorAll('.js-sub-status').forEach(function (x) { targets.push(x); });
+    if (!targets.length) return;
+    var html = '';
+    var u = currentUser();
+    if (String(u.username || '').toLowerCase() === 'qqc0d') {
+      html = '<span class="sub-badge">⭐ Фулл + навсегда By qqc0d</span>' +
+        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Подписка активна</div>';
+    } else if (active()) {
+      var forever = sub.forever !== false;
+      var days = forever ? '∞' : Math.max(0, Math.ceil(((sub.until || (sub.since || Date.now()) + 30 * 86400000) - Date.now()) / 86400000));
+      html = '<div style="color:#9aa1b5;font-size:14px">Подписка: Бета</div>' +
+        '<span class="sub-badge" style="margin-top:10px;display:inline-flex">✅ Бета: ' + (forever ? 'навсегда' : 'активна') + '</span>' +
+        '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Дней осталось: ' + days + ' · подписка активна</div>';
     } else {
-      el.innerHTML = '<div style="color:#9aa1b5;font-size:14px">Бета: не активирована</div>' +
+      html = '<div style="color:#9aa1b5;font-size:14px">Подписка: Фри</div>' +
+        '<div style="margin-top:8px;color:#9aa1b5;font-size:14px">Бета: не активирована</div>' +
         '<div style="margin-top:12px;color:#9aa1b5;font-size:13px">Введите ключ или оплатите доступ</div>';
     }
+    targets.forEach(function (el) { el.innerHTML = html; });
   }
 
   function addButtons() {

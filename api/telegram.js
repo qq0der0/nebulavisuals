@@ -10,7 +10,7 @@ const GOAL = 125;
 const GOAL_PROMO = 110; // промокод qqc0d / Nebula даёт -10% → 110 ⭐
 const BLOB_PATH = 'nebula/paynebula-state.json';
 const EVENT_BLOB = 'nebula/events-live.json';
-const KEYS_URL = 'https://nebulavisuals-public-sandy.vercel.app/keys.json';
+const KEYS_URL = 'https://nebulavisuals-public-sandy.vercel.app/keys-tg.json';
 const FUNTIME_TOKEN = process.env.FUNTIME_CLIENT_TOKEN || '';
 const FUNTIME_URL = 'https://api.funtime.su/v2/events';
 
@@ -77,14 +77,25 @@ async function fetchFuntime() {
     const r = await fetch(FUNTIME_URL, { headers: { 'client-token': FUNTIME_TOKEN }, cache: 'no-store' });
     if (!r.ok) return null;
     const data = await r.json();
-    const list = Array.isArray(data) ? data : (data.events || data.data || []);
+    const groups = Array.isArray(data) ? data : (data.items || data.events || data.data || []);
+    const list = [];
+    let nextSec = 0;
+    groups.forEach(function (g) {
+      if (g.server) {
+        const sec = Number(g.nextScheduledEventInSeconds) || 0;
+        if (sec && (!nextSec || sec < nextSec)) nextSec = sec;
+      }
+      (g.events || []).forEach(function (ev) {
+        list.push({ name: ev.name || ev.type || 'Ивент', server: g.server || ev.server || '', type: ev.type || '', phase: ev.phase || '', sec: Number(ev.timeLeftSeconds) || 0 });
+      });
+    });
     if (!list.length) return null;
     const current = list.map(function (ev) {
-      const name = ev.name || ev.type || 'Ивент';
-      const server = ev.server || '';
-      return server ? (name + ' → ' + server) : name;
+      let label = ev.name + (ev.server ? ' → ' + ev.server : '');
+      if (ev.phase) label += ' [' + ev.phase + ']';
+      return label;
     });
-    const next = fmtTime(Math.min.apply(null, list.map(function (ev) { return Number(ev.timeLeftSeconds) || 0; }).filter(function (x) { return x > 0; })) || 0);
+    const next = fmtTime(nextSec || Math.min.apply(null, list.map(function (ev) { return ev.sec; }).filter(function (x) { return x > 0; })) || 0);
     const e = { current: current, next: next || '—', shown: current.length + ' из ' + current.length, ts: Date.now(), live: true };
     await saveEvents(e);
     return e;
@@ -180,20 +191,18 @@ module.exports = async (req, res) => {
     return res.status(200).json({ ok: true });
   }
   if (msg.text === 'Промокод') {
-    const sp = await load();
-    sp.promo = sp.promo || {};
-    sp.promo[chat] = true;
-    await save(sp);
-    await tg('sendMessage', { chat_id: chat,
-      text: 'Введите промокод (qqc0d или Nebula) — скидка 10%, цель станет ' + GOAL_PROMO + ' ⭐ вместо ' + GOAL + '.',
-      reply_markup: keyboard });
+    const sp0 = await load();
+    sp0.promo = sp0.promo || {};
+    sp0.promo[chat] = true;
+    await save(sp0);
+    await tg('sendMessage', { chat_id: chat, text: 'Введите промокод', reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }
   if (msg.text === 'Купить' || msg.text === 'О нас' || msg.text === 'Задать вопрос' ||
       msg.text === 'Ближайшие ивенты' || msg.text === 'Текущие ивенты') {
     let text = '';
     if (msg.text === 'Купить') {
-      text = 'Чтобы мы дали вам ключ оплатите 125 звезд или купите на сайте: https://nebulavisuals-public-sandy.vercel.app/';
+      text = 'Чтобы получить ключ, напишите в мой личный Telegram: @efelyz — там я выдам ключ или промокод. Либо купите на сайте: https://nebulavisuals-public-sandy.vercel.app/';
     } else if (msg.text === 'О нас') {
       text = 'Nebula Visuals — клиент для Minecraft с визуальными эффектами, стабильным FPS и умной оптимизацией. Один лаунчер — и игра обновляется сама.';
     } else if (msg.text === 'Задать вопрос') {
@@ -233,7 +242,7 @@ module.exports = async (req, res) => {
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true });
   }
-  // ввод промокода: цель 125 → 110
+  // ввод промокода
   const sPromo = await load();
   if (sPromo.promo && sPromo.promo[chat] && msg.text && /^[A-Za-z0-9_-]{3,32}$/.test(msg.text)) {
     const code = msg.text.trim().toLowerCase();
@@ -242,10 +251,48 @@ module.exports = async (req, res) => {
       sPromo.goal = sPromo.goal || {};
       sPromo.goal[chat] = GOAL_PROMO;
       await save(sPromo);
-      await tg('sendMessage', { chat_id: chat, text: 'Промокод принят! Теперь нужно ' + GOAL_PROMO + ' ⭐ (было ' + GOAL + ').', reply_markup: keyboard });
+      await tg('sendMessage', { chat_id: chat,
+        text: 'Промокод активирован. Скиньте скрины мой юз @efelyz чтобы получить скидку', reply_markup: keyboard });
       return res.status(200).json({ ok: true, goal: GOAL_PROMO });
     }
-    await tg('sendMessage', { chat_id: chat, text: 'Промокод не найден. Попробуйте qqc0d или Nebula.', reply_markup: keyboard });
+    await save(sPromo);
+    await tg('sendMessage', { chat_id: chat, text: 'Промокода не существует', reply_markup: keyboard });
+    return res.status(200).json({ ok: true });
+  }
+
+  // скрины подарков → админу; его ответом выдаётся ключ/промокод
+  if ((msg.photo || msg.document) && process.env.ADMIN_CHAT_ID) {
+    const sShot = await load();
+    sShot.shots = sShot.shots || {};
+    sShot.nextShot = Number(sShot.nextShot) || 1;
+    const id = String(sShot.nextShot++);
+    sShot.shots[id] = chat;
+    await save(sShot);
+    const caption = '#G' + id + ' Скрин подарка от ' + chat + '. Ответьте на это сообщение ключом/промокодом.';
+    try {
+      if (msg.photo) {
+        const fileId = msg.photo[msg.photo.length - 1].file_id;
+        await tg('sendPhoto', { chat_id: process.env.ADMIN_CHAT_ID, photo: fileId, caption: caption });
+      } else {
+        await tg('sendDocument', { chat_id: process.env.ADMIN_CHAT_ID, document: msg.document.file_id, caption: caption });
+      }
+    } catch (e) {}
+    await tg('sendMessage', { chat_id: chat, text: 'Скрин отправлен администратору. Ожидайте ключ.', reply_markup: keyboard });
+    return res.status(200).json({ ok: true, shot: id });
+  }
+  // ответ администратора на скрин → ключ/промокод пользователю
+  if (String(chat) === String(process.env.ADMIN_CHAT_ID) && msg.reply_to_message && msg.text) {
+    const m = String(msg.reply_to_message.caption || msg.reply_to_message.text || '').match(/#G(\d+)/);
+    if (m) {
+      const sRep = await load();
+      const target = sRep.shots && sRep.shots[m[1]];
+      if (target) {
+        await tg('sendMessage', { chat_id: target, text: 'Ваш ключ/промокод: ' + msg.text, reply_markup: keyboard });
+        await tg('sendMessage', { chat_id: chat, text: 'Отправлено пользователю.' });
+        delete sRep.shots[m[1]];
+        await save(sRep);
+      }
+    }
     return res.status(200).json({ ok: true });
   }
 
