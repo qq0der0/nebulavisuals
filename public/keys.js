@@ -156,6 +156,23 @@
       heroBuy.dataset.bound = '1';
       heroBuy.addEventListener('click', function () { payModal.classList.add('open'); });
     }
+    // Скачивание лаунчера — только для бет (или админа)
+    var u = currentUser();
+    var isAdmin = String(u.username || '').toLowerCase() === 'qqc0d';
+    var canDownload = isAdmin || active();
+    var dl = document.getElementById('download-btn');
+    if (dl) dl.style.display = canDownload ? '' : 'none';
+    if (canDownload && !document.getElementById('nkBetaLaunch')) {
+      var betaBtn = document.createElement('button');
+      betaBtn.id = 'nkBetaLaunch'; betaBtn.className = 'nk-btn'; betaBtn.type = 'button';
+      betaBtn.textContent = 'Открыть Nebula Visuals Beta';
+      betaBtn.style.marginLeft = '8px';
+      betaBtn.addEventListener('click', function () {
+        window.location.href = 'nebula://beta?token=nvbeta-qqc0d-2026';
+      });
+      var actions = document.querySelector('#tab-home .actions');
+      if (actions) actions.appendChild(betaBtn);
+    }
     var home = document.getElementById('tab-home');
     if (home && !document.getElementById('nkPayHome')) {
       var pay = document.createElement('button');
