@@ -47,11 +47,12 @@ async function sendLong(chat, text, markup) {
   }
   return chunks.length;
 }
-function tg(method, payload) {
+function tg(method, payload, token) {
   return new Promise((res) => {
     const data = Buffer.from(JSON.stringify(payload));
+    const botToken = token || TOKEN;
     const r = https.request({ hostname: 'api.telegram.org', method: 'POST',
-      path: '/bot' + TOKEN + '/' + method,
+      path: '/bot' + botToken + '/' + method,
       headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
     }, (resp) => { let b=''; resp.on('data',c=>b+=c); resp.on('end',()=>{
       try {
@@ -307,10 +308,10 @@ module.exports = async (req, res) => {
     await save(sAsk);
     const adminChat = process.env.ADMIN_CHAT_ID || '';
     if (adminChat) {
-      await tg(process.env.QUESTION_BOT_TOKEN || '', 'sendMessage', {
+      await tg('sendMessage', {
         chat_id: adminChat,
         text: '#Q' + qid + ' Вопрос из @paynebulabot:\n\n' + msg.text
-      });
+      }, process.env.QUESTION_BOT_TOKEN || '');
     }
     await tg('sendMessage', { chat_id: chat, text: 'Вопрос отправлен администратору.', reply_markup: keyboard });
     return res.status(200).json({ ok: true, ticket: qid });
