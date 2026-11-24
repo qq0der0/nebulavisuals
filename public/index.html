@@ -294,7 +294,7 @@ header.nav .nav-support, header.nav .nav-auth, header.nav .nav-profile-link { mi
 header.nav .nav-tg { width:36px !important; height:36px !important; }
 header.nav .nav-tg svg { width:22px !important; height:22px !important; }
 header.nav .nav-auth { padding:0 13px !important; font-size:12px !important; }
-header.nav .nav-profile-avatar { width:30px !important; height:30px !important; }
+header.nav .nav-profile-avatar { width:42px !important; height:42px !important; }
 header.nav .nav-support-text { font-size:12.5px !important; }
 header.nav .nav-support-heart { width:20px !important; height:20px !important; }
 @media (max-width:1350px) {
@@ -374,8 +374,8 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
       <button class="nav-auth" id="nav-auth-btn" aria-label="Войти или зарегистрироваться">
         <span class="nav-auth-text">Войти</span>
       </button>
-      <!-- Профиль отключён: только главная -->
-      <a class="nav-profile-link" id="nav-profile-link" href="/" aria-label="Профиль" style="display:none">
+      <!-- Profile link (shown when logged in) — opens profile.html -->
+      <a class="nav-profile-link" id="nav-profile-link" href="/profile.html" aria-label="Профиль" style="display:none">
         <span class="nav-profile-avatar" id="nav-profile-avatar">
           <img src="/avatar-nebula.png" alt="" class="nav-avatar-img" id="nav-avatar-img">
         </span>
@@ -422,7 +422,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
           <span class="btn-icon" aria-hidden="true">🌐</span>
         </a>
       </div>
-      <div class="js-sub-status" style="margin:18px auto 0;padding:12px 18px;border-radius:14px;max-width:520px;background:rgba(255,255,255,.04);border:1px solid rgba(180,150,255,.2);text-align:center;"></div>
+      <button class="nk-btn" id="nkHeroBuy" type="button" style="margin:18px auto 0;">Купить бету</button>
       <div class="hero-stats">
         <div class="stat"><div class="stat-value">1.21.4</div><div class="stat-label">версия игры</div></div>
         <div class="stat"><div class="stat-value">Fabric</div><div class="stat-label">загрузчик модов</div></div>
