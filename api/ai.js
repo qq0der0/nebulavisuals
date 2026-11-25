@@ -41,7 +41,7 @@ async function gemini(messages) {
     systemInstruction: sys ? { parts: [{ text: String(sys.content || '').slice(0, 8000) }] } : undefined,
     generationConfig: { maxOutputTokens: 900, temperature: 0.75 }
   }, 22000);
-  if (r.status !== 200) return null;
+  if (r.status !== 200) { global.__geminiErr = r.status + ': ' + String(r.body || '').slice(0, 400); return null; }
   try {
     const j = JSON.parse(r.body);
     const parts = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
@@ -76,5 +76,5 @@ module.exports = async (req, res) => {
   if (!answer) return json(res, 502, { ok: false, error: 'AI unavailable' });
   CACHE.set(key, answer);
   if (CACHE.size > 200) CACHE.clear();
-  return json(res, 200, { ok: true, answer: answer, source: source });
+  return json(res, 200, { ok: true, answer: answer, source: source, debug: body.debug ? (global.__geminiErr || '') : undefined });
 };
