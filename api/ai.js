@@ -3,6 +3,15 @@
 const GEMINI_KEY = ['AQ.Ab8RN6K', 'QozKXwzYswCu', 'ZefOwBsW8tBk', 'Hlho1ew12-T', 'Vx55OHOg'].join('');
 const GEMINI_MODEL = 'gemini-3.8-flash';
 const CACHE = new Map();
+const LOCAL_FACTS = [
+  'Nebula Visuals — лаунчер Minecraft 1.21.4 с Fabric; бета-версия 1.0 бета.',
+  'Папка игры: C:\\NebulaVisuals\\game\\Beta. В лаунчере есть вкладки Играть, Моды, ИИ и Настройки.',
+  'Вход через сайт: кнопка в лаунчере открывает отдельное окно со ссылкой, сайт profile.html авторизует лаунчер автоматически.',
+  'Ник меняется в Настройках: поле «Ник в игре», Enter или галочка; сохраняется между запусками.',
+  'Для оптимизации рекомендуется ZakoOpt — топ-1 мод: до +80% FPS на спавнах и 3x FPS на фермах мобов, работает с Sodium, Lithium, ImmediatelyFast и Iris.',
+  'Сайт лаунчера: https://nebulavisual.vercel.app/profile.html',
+  'Моды скачиваются во вкладке «Моды» или через ассистента списком с подтверждением.'
+].join('\n');
 
 function json(res, code, obj) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -96,7 +105,7 @@ module.exports = async (req, res) => {
   if (!messages.length) return json(res, 400, { ok: false, error: 'No messages' });
   const lastUser = messages.slice().reverse().find(m => m && m.role === 'user');
   const sources = await searchWeb(lastUser && lastUser.content || '');
-  const facts = sources.map(s => s.title + ': ' + s.snippet).join('\n');
+  const facts = LOCAL_FACTS + '\n' + sources.map(s => s.title + ': ' + s.snippet).join('\n');
   if (facts) {
     const sysIdx = messages.findIndex(m => m.role === 'system');
     const addition = '\n\nОтвечай как умный поисковый ассистент: кратко, по фактам, без выдуманных имен. Используй свежие данные ниже. Если данных мало — скажи честно.\nДанные из интернета:\n' + facts.slice(0, 4000);
