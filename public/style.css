@@ -8,10 +8,10 @@
   --text-dim: #9aa4b8;
   --muted: #6b748c;
   --accent: #ffffff;
-  --accent-blue: #4a9eff;
-  --accent-purple: #a86bff;
-  --accent-green: #24e07a;
-  --accent-pink: #ff4da6;
+  --accent-blue: #c9cbd2;
+  --accent-purple: #8e919b;
+  --accent-green: #d8d9de;
+  --accent-pink: #b9bbc2;
   --radius: 16px;
   --radius-sm: 10px;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -81,7 +81,7 @@ html {
 }
 
 /* Канва вне скруглённого «листа» страницы — глубокий фиолетово-чёрный */
-html { background: #16122a; }
+html { background: #0a0a0e; }
 
 body {
   background:
@@ -121,7 +121,7 @@ button, input, textarea, select, optgroup, label, legend, fieldset {
 .bg-aura {
   position: absolute; left: -20%; top: -35%; width: 140vw; height: 90vh;
   background:
-    radial-gradient(45% 55% at 28% 35%, rgba(168,107,255,.34), transparent 72%),
+    radial-gradient(45% 55% at 28% 35%, rgba(255,255,255,.34), transparent 72%),
     radial-gradient(40% 48% at 72% 20%, rgba(98,86,255,.26), transparent 74%),
     radial-gradient(35% 45% at 52% 60%, rgba(208,120,255,.16), transparent 76%);
   filter: blur(38px);
@@ -1066,7 +1066,7 @@ button, input, textarea, select, optgroup, label, legend, fieldset {
   content: counter(rule);
   position: absolute; left: 0; top: 0;
   width: 17px; height: 17px; border-radius: 50%;
-  background: rgba(168,107,255,0.15); color: var(--accent-purple);
+  background: rgba(255,255,255,0.15); color: var(--accent-purple);
   font-size: 10px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
@@ -1691,7 +1691,7 @@ body:not(.nv-intro-active) .nav-inner .brand-logo-icon { width: 34px !important;
 .nv-intro-stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
 .nv-intro-logo {
   width: 190px; height: 190px; object-fit: contain; position: relative; z-index: 2;
-  filter: drop-shadow(0 0 28px rgba(168,107,255,.55));
+  filter: drop-shadow(0 0 28px rgba(255,255,255,.55));
   transform: translate3d(0,0,0) scale(1);
   transition: transform 1.05s cubic-bezier(.22,.9,.28,1), opacity .5s ease, filter .7s ease;
 }
@@ -1704,16 +1704,16 @@ body:not(.nv-intro-active) .nav-inner .brand-logo-icon { width: 34px !important;
   stroke-linecap: round;
   stroke-dasharray: 628.32;
   stroke-dashoffset: 628.32;
-  filter: drop-shadow(0 0 8px rgba(168,107,255,.9));
+  filter: drop-shadow(0 0 8px rgba(255,255,255,.9));
   animation: nvRingFill 2.1s cubic-bezier(.35,.1,.25,1) forwards;
 }
 @keyframes nvRingFill { to { stroke-dashoffset: 0; } }
 /* логотип «улетает» в шапку */
-.nv-intro.flying .nv-intro-logo { filter: drop-shadow(0 0 12px rgba(168,107,255,.4)); }
+.nv-intro.flying .nv-intro-logo { filter: drop-shadow(0 0 12px rgba(255,255,255,.4)); }
 .nv-intro.flying .nv-intro-ring { opacity: 0; transition: opacity .35s ease; }
 .nv-intro.flying .nv-intro-stage::after {
   content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle, rgba(168,107,255,.28), transparent 65%);
+  background: radial-gradient(circle, rgba(255,255,255,.28), transparent 65%);
   animation: nvRingBurst .8s ease-out forwards;
 }
 @keyframes nvRingBurst { to { transform: scale(2.4); opacity: 0; } }

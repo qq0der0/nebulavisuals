@@ -7,17 +7,17 @@
   --text: #f0f2fa;
   --text-dim: #9aa4b8;
   --muted: #6b748c;
-  --accent-blue: #4a9eff;
-  --accent-purple: #a86bff;
-  --accent-green: #24e07a;
-  --accent-pink: #ff4d66;
+  --accent-blue: #c9cbd2;
+  --accent-purple: #8e919b;
+  --accent-green: #d8d9de;
+  --accent-pink: #b9bbc2;
   --radius: 14px;
   --radius-sm: 10px;
   --transition: 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; background: #16122a; }
+html { scroll-behavior: smooth; background: #0a0a0e; }
 
 body {
   display: flow-root; /* не даём margin .shell «схлопнуться» наружу — иначе сверху видна тёмная полоса */
@@ -46,7 +46,7 @@ body {
 .bg-aura {
   position: absolute; left: -20%; top: -35%; width: 140vw; height: 90vh;
   background:
-    radial-gradient(45% 55% at 28% 35%, rgba(168,107,255,.34), transparent 72%),
+    radial-gradient(45% 55% at 28% 35%, rgba(255,255,255,.34), transparent 72%),
     radial-gradient(40% 48% at 72% 20%, rgba(98,86,255,.26), transparent 74%),
     radial-gradient(35% 45% at 52% 60%, rgba(208,120,255,.16), transparent 76%);
   filter: blur(38px); transform: translate3d(0,0,0) scale(1.05);
@@ -125,7 +125,7 @@ body {
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-.nav-item.active { background: linear-gradient(135deg, rgba(74,158,255,0.18), rgba(168,107,255,0.14)); border-color: rgba(74,158,255,0.35); color: #fff; }
+.nav-item.active { background: linear-gradient(135deg, rgba(74,158,255,0.18), rgba(255,255,255,0.14)); border-color: rgba(74,158,255,0.35); color: #fff; }
 .nav-icon { font-size: 16px; }
 
 .logout-btn {
