@@ -368,7 +368,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               authOp: 'linkSave', token: token,
-              username: user.username, password: user.password || '', email: user.email || '',
+              username: user.username, password: user.password || '', email: user.email || '', role: user.role || '',
               avatar: user.avatar || user.avatarSmall || '', trusted: true
             })
           });

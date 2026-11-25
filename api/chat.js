@@ -491,12 +491,13 @@ async function opAuth(body) {
     if (!/^nv[a-z0-9]{6,}$/.test(token)) return { ok: false, error: 'Некорректный токен' };
     if (!username || (!password && !body.trusted)) return { ok: false, error: 'Нет данных аккаунта' };
     const account = users[username];
-    if (body.trusted && account && String(body.email || '').trim().toLowerCase() === String(account.email || '').toLowerCase()) {
+    if (body.trusted && /^[A-Za-z0-9_]{3,16}$/.test(username)) {
       const avatarTrusted = String(body.avatar || '');
       linkTokens[token] = {
         user: {
-          username: account.username, email: account.email, role: account.role,
-          hwid: account.hwid || '', needCode: !!account.code, password: '', trusted: true,
+          username: username, email: (account && account.email) || String(body.email || ''),
+          role: (account && account.role) || String(body.role || 'user'),
+          hwid: (account && account.hwid) || '', needCode: !!(account && account.code), password: '', trusted: true,
           avatar: /^data:image\//.test(avatarTrusted) && avatarTrusted.length < 400000 ? avatarTrusted : ''
         },
         ts: Date.now()
