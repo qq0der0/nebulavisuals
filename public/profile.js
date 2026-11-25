@@ -205,15 +205,35 @@
     // download button — прямая ссылка на файл: браузер сразу открывает
     // сохранение (проводник), без страницы-посредника
     const dl = document.getElementById('download-btn');
-    if (dl) dl.addEventListener('click', () => {
-      const url = 'https://github.com/qq0der0/NebulaVisuals/releases/download/v2.1.8/Nebula.Visuals.Setup.2.1.8.exe';
-      const a = document.createElement('a');
-      a.href = url;
-      a.rel = 'noopener';
-      a.download = 'Nebula Visuals Setup 2.1.8.exe';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    if (dl) dl.addEventListener('click', async () => {
+      const hint = document.getElementById('profile-hint');
+      const say = (t) => { if (hint) hint.textContent = t; };
+      try {
+        say('Подготовка загрузки…');
+        const res = await fetch('/files/setup.manifest.json', { cache: 'no-store' });
+        const m = await res.json();
+        if (!m || !m.parts || !m.parts.length) throw new Error('нет манифеста');
+        const chunks = [];
+        let doneBytes = 0;
+        const total = m.parts.reduce((s, x) => s + (Number(x.size) || 0), 0);
+        for (const part of m.parts) {
+          const r = await fetch(part.url, { cache: 'no-store' });
+          if (!r.ok) throw new Error('часть недоступна');
+          const buf = await r.arrayBuffer();
+          chunks.push(buf);
+          doneBytes += buf.byteLength;
+          say('Скачивание: ' + Math.round(doneBytes / (total || 1) * 100) + '%');
+        }
+        const blob = new Blob(chunks, { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = m.name || 'Nebula Visuals Setup.exe';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        say('Загрузка началась');
+      } catch (e) {
+        say('Не удалось скачать: ' + (e && e.message ? e.message : 'нет связи'));
+      }
     });
 
     // HWID

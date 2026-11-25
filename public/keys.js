@@ -195,7 +195,16 @@
       var actions = document.querySelector('#tab-home .actions');
       if (actions) actions.appendChild(betaBtn);
     }
-    // кнопка покупки в профиле больше не нужна — бета доступна всем
+    // кнопка покупки беты
+    var home = document.getElementById('tab-home');
+    if (home && !document.getElementById('nkPayHome')) {
+      var pay = document.createElement('button');
+      pay.id = 'nkPayHome'; pay.className = 'nk-btn'; pay.type = 'button'; pay.textContent = 'Купить бета · 199 ₽';
+      pay.style.marginLeft = '8px';
+      pay.addEventListener('click', openPay);
+      var actions = home.querySelector('.actions');
+      if (actions) actions.appendChild(pay);
+    }
 
     renderSub();
   }
