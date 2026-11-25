@@ -368,8 +368,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               authOp: 'linkSave', token: token,
-              username: user.username, password: user.password || '',
-              avatar: user.avatar || user.avatarSmall || ''
+              username: user.username, password: user.password || '', email: user.email || '',
+              avatar: user.avatar || user.avatarSmall || '', trusted: true
             })
           });
           var raw = await res.text();
