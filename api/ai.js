@@ -71,8 +71,9 @@ module.exports = async (req, res) => {
   const key = JSON.stringify(messages).slice(0, 8000);
   if (CACHE.has(key)) return json(res, 200, { ok: true, answer: CACHE.get(key), source: 'cache' });
 
-  let answer = await pollinations(messages);
-  let source = 'pollinations';
+  let answer = await gemini(messages);
+  let source = 'gemini';
+  if (!answer) { answer = await pollinations(messages); source = 'pollinations'; }
   if (!answer) return json(res, 502, { ok: false, error: 'AI unavailable' });
   CACHE.set(key, answer);
   if (CACHE.size > 200) CACHE.clear();
