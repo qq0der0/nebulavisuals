@@ -476,12 +476,43 @@ async function loadUsersFresh() {
   Object.keys(usersMem).forEach(function (k) { map[k] = usersMem[k]; });
   return map;
 }
+// Разовые токены для входа в лаунчер через сайт (живут 5 минут)
+const linkTokens = {};
 async function opAuth(body) {
   const op = body.op;
   const users = await loadUsers();
   const username = String(body.username || '').trim();
   const password = String(body.password || '');
   const email = String(body.email || '').trim().toLowerCase();
+
+  // вход через сайт: браузер кладёт данные аккаунта по токену, лаунчер забирает
+  if (op === 'linkSave') {
+    const token = String(body.token || '').trim();
+    if (!/^nv[a-z0-9]{6,}$/.test(token)) return { ok: false, error: 'Некорректный токен' };
+    if (!username || !password) return { ok: false, error: 'Нет данных аккаунта' };
+    if (!u || u.pass !== hashPass(password)) return { ok: false, error: 'Неверный ник или пароль' };
+    const avatar = String(body.avatar || '');
+    linkTokens[token] = {
+      user: {
+        username: u.username, email: u.email, role: u.role,
+        hwid: u.hwid || '', needCode: !!u.code, password: password,
+        avatar: /^data:image\//.test(avatar) && avatar.length < 400000 ? avatar : ''
+      },
+      ts: Date.now()
+    };
+    Object.keys(linkTokens).forEach(function (k) {
+      if (Date.now() - linkTokens[k].ts > 10 * 60 * 1000) delete linkTokens[k];
+    });
+    return { ok: true };
+  }
+
+  if (op === 'linkCheck') {
+    const token = String(body.token || '').trim();
+    const rec = linkTokens[token];
+    if (!rec || Date.now() - rec.ts > 5 * 60 * 1000) { delete linkTokens[token]; return { ok: false }; }
+    delete linkTokens[token];
+    return { ok: true, user: rec.user };
+  }
 
   if (op === 'register') {
     if (!/^[A-Za-z0-9_]{3,16}$/.test(username)) return { ok: false, error: 'Ник: 3–16 символов (латиница, цифры, _)' };

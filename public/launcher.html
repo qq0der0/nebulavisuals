@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nebula Visuals — вход в лаунчер</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; }
+body { min-height:100vh; display:flex; align-items:center; justify-content:center; color:#fff;
+  background:radial-gradient(60% 60% at 50% 0%,#241a4d,#0b0a13 70%); padding:24px; }
+.card { width:min(560px,100%); padding:36px; border-radius:26px; text-align:center;
+  background:linear-gradient(180deg,rgba(35,33,52,.95),rgba(18,18,28,.97));
+  border:1px solid rgba(255,255,255,.1); box-shadow:0 30px 90px rgba(0,0,0,.55); animation:in .55s ease both; }
+@keyframes in { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+.logo { font-size:11px; font-weight:800; letter-spacing:.36em; color:#b79bff; margin-bottom:16px; }
+h1 { font-size:25px; margin-bottom:10px; }
+p { font-size:13px; line-height:1.65; color:#a7adbd; margin-bottom:22px; }
+.field { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px;
+  border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); margin-bottom:10px; text-align:left; }
+.field span { font-size:11px; color:#8f96a9; }
+.field b { font-size:13px; color:#fff; word-break:break-all; }
+.field input { flex:1; background:transparent; border:0; outline:0; color:#fff; font-size:13px; font-weight:700; }
+button { width:100%; padding:14px; border-radius:14px; border:1px solid rgba(255,255,255,.22);
+  background:transparent; color:#fff; font-size:14px; font-weight:800; cursor:pointer; transition:.25s; margin-top:12px; }
+button:hover { background:rgba(255,255,255,.1); border-color:rgba(167,139,250,.7); transform:translateY(-2px); }
+button:disabled { opacity:.55; cursor:default; transform:none; }
+.msg { min-height:20px; margin-top:14px; font-size:12px; color:#7ef0a8; }
+.msg.err { color:#ff9090; }
+a { color:#b79bff; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">NEBULA VISUALS</div>
+  <h1>Вход в лаунчер</h1>
+  <p>Ник и пароль введены автоматически из вашего профиля на сайте. Нажмите «Войти через сайт», чтобы подтвердить вход.</p>
+  <div class="field"><span>Ник</span><input id="nick" maxlength="16" autocomplete="username"></div>
+  <div class="field"><span>Пароль</span><input id="pass" type="password" autocomplete="current-password"></div>
+  <button id="go">Войти через сайт →</button>
+  <button id="toLauncher" style="display:none">Вернуться в лаунчер</button>
+  <div class="msg" id="msg"></div>
+  <a href="/">Открыть главную сайта</a>
+</div>
+<script>
+(function () {
+  var token = new URLSearchParams(location.search).get('launcher') || '';
+  var nick = document.getElementById('nick');
+  var pass = document.getElementById('pass');
+  var go = document.getElementById('go');
+  var msg = document.getElementById('msg');
+  var auth = null, users = [];
+  try { auth = JSON.parse(localStorage.getItem('nebula_auth') || 'null'); } catch (e) {}
+  try { users = JSON.parse(localStorage.getItem('nebula_users') || '[]'); } catch (e) {}
+  var me = null;
+  if (auth && auth.username) {
+    for (var i = 0; i < users.length; i++) if (users[i].username === auth.username) { me = users[i]; break; }
+  }
+  if (me) {
+    nick.value = me.username || '';
+    pass.value = me.password || '';
+  } else if (auth && auth.username) {
+    nick.value = auth.username;
+  }
+  go.addEventListener('click', async function () {
+    if (!token) { msg.className = 'msg err'; msg.textContent = 'Ссылка недействительна. Нажмите «Войти через сайт» в лаунчере ещё раз.'; return; }
+    if (!nick.value.trim() || !pass.value) { msg.className = 'msg err'; msg.textContent = 'Введите ник и пароль'; return; }
+    go.disabled = true; go.textContent = 'Проверяем…';
+    try {
+      var res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          authOp: 'linkSave', token: token,
+          username: nick.value.trim(), password: pass.value,
+          avatar: (me && (me.avatar || me.avatarSmall)) || ''
+        })
+      });
+      var data = await res.json();
+      if (data && data.ok) {
+        msg.className = 'msg'; msg.textContent = 'Готово! Вернитесь в лаунчер — вход выполнится автоматически.';
+        go.style.display = 'none';
+        document.getElementById('toLauncher').style.display = '';
+      } else {
+        msg.className = 'msg err'; msg.textContent = (data && data.error) || 'Не удалось подтвердить вход';
+      }
+    } catch (e) { msg.className = 'msg err'; msg.textContent = 'Сайт недоступен, попробуйте ещё раз'; }
+    go.disabled = false; go.textContent = 'Войти через сайт →';
+  });
+  document.getElementById('toLauncher').addEventListener('click', function () { location.href = '/'; });
+})();
+</script>
+</body>
+</html>
