@@ -490,12 +490,13 @@ async function opAuth(body) {
     const token = String(body.token || '').trim();
     if (!/^nv[a-z0-9]{6,}$/.test(token)) return { ok: false, error: 'Некорректный токен' };
     if (!username || !password) return { ok: false, error: 'Нет данных аккаунта' };
-    if (!u || u.pass !== hashPass(password)) return { ok: false, error: 'Неверный ник или пароль' };
+    const account = users[username];
+    if (!account || account.pass !== hashPass(password)) return { ok: false, error: 'Неверный ник или пароль' };
     const avatar = String(body.avatar || '');
     linkTokens[token] = {
       user: {
-        username: u.username, email: u.email, role: u.role,
-        hwid: u.hwid || '', needCode: !!u.code, password: password,
+        username: account.username, email: account.email, role: account.role,
+        hwid: account.hwid || '', needCode: !!account.code, password: password,
         avatar: /^data:image\//.test(avatar) && avatar.length < 400000 ? avatar : ''
       },
       ts: Date.now()
