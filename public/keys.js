@@ -177,10 +177,8 @@
       heroBuy.dataset.bound = '1';
       heroBuy.addEventListener('click', openPay);
     }
-    // Обычная скачка доступна всем; бета-кнопка — только бетам/админу
-    var u = currentUser();
-    var isAdmin = String(u.username || '').toLowerCase() === 'qqc0d';
-    var canBeta = isAdmin || active();
+    // Скачать файл и бету — доступно всем пользователям
+    var canBeta = true;
     var dl = document.getElementById('download-btn');
     if (dl) dl.style.display = '';
     if (canBeta && !document.getElementById('nkBetaDownload')) {
@@ -197,15 +195,8 @@
       var actions = document.querySelector('#tab-home .actions');
       if (actions) actions.appendChild(betaBtn);
     }
-    var home = document.getElementById('tab-home');
-    if (home && !document.getElementById('nkPayHome')) {
-      var pay = document.createElement('button');
-      pay.id = 'nkPayHome'; pay.className = 'nk-btn'; pay.type = 'button'; pay.textContent = 'Купить бета · 199 ₽';
-      pay.style.marginLeft = '8px';
-      pay.addEventListener('click', openPay);
-      var actions = home.querySelector('.actions');
-      if (actions) actions.appendChild(pay);
-    }
+    // кнопка покупки в профиле больше не нужна — бета доступна всем
+
     renderSub();
   }
   window.NebulaKeys = { addButtons: addButtons, renderSub: renderSub };
