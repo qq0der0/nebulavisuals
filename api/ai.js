@@ -84,9 +84,22 @@ async function searchWeb(q) {
   });
   return sources;
 }
-async function ovhChat(messages) {
+async function kiloChat(messages) {
+  const r = await post('https://ai-gateway.kilo.ai/api/v1/chat/completions', {}, {
+    model: 'kilo-auto/free', messages: messages, max_tokens: 900, temperature: 0.7
+  }, 25000);
+  if (r.status !== 200) return null;
+  try {
+    const j = JSON.parse(r.body);
+    const m = j.choices && j.choices[0] && j.choices[0].message;
+    let ans = m && m.content;
+    if (!ans && m && m.reasoning) ans = String(m.reasoning).replace(/\s+/g, ' ').trim();
+    return ans ? String(ans).trim() : null;
+  } catch (e) { return null; }
+}
+async function ovhChat(messages, model) {
   const r = await post('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions', {}, {
-    model: 'gpt-oss-120b', messages: messages, max_tokens: 900, temperature: 0.7
+    model: model || 'gpt-oss-120b', messages: messages, max_tokens: 900, temperature: 0.7
   }, 18000);
   if (r.status !== 200) return null;
   try {
@@ -126,8 +139,10 @@ module.exports = async (req, res) => {
   const key = JSON.stringify(messages).slice(0, 8000);
   if (CACHE.has(key)) return json(res, 200, { ok: true, answer: CACHE.get(key), source: 'cache' });
 
-  let answer = await ovhChat(messages);
-  let source = 'ovh';
+  let answer = await kiloChat(messages);
+  let source = 'kilo-free';
+  if (!answer) { answer = await ovhChat(messages, 'gpt-oss-120b'); source = 'ovh-120b'; }
+  if (!answer) { answer = await ovhChat(messages, 'Meta-Llama-3_3-70B-Instruct'); source = 'ovh-llama'; }
   if (!answer) { answer = await pollinations(messages); source = 'pollinations'; }
   if (!answer) return json(res, 502, { ok: false, error: 'AI unavailable' });
   CACHE.set(key, answer);
