@@ -351,20 +351,15 @@
       toast('Пароль сохранён');
     });
 
-    //autologin в лаунчер через сайт
+    // вход в лаунчер только по ссылке из лаунчера (?launcher=токен)
     (function () {
-      var btn = document.getElementById('launcher-login-btn');
       var msg = document.getElementById('launcher-login-msg');
       var token = new URLSearchParams(window.location.search).get('launcher') || '';
-      if (!btn) return;
-      btn.addEventListener('click', async function () {
-        if (!token) { if (msg) msg.textContent = 'Нажмите «Войти через сайт» в лаунчере'; return; }
-        if (!user || !user.username) { if (msg) msg.textContent = 'Нет данных аккаунта'; return; }
-        btn.disabled = true;
+      if (!token || !user || !user.username) return;
+      (async function () {
         try {
           var res = await fetch('/api/chat', {
-            method: 'POST',
-            cache: 'no-store',
+            method: 'POST', cache: 'no-store',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               authOp: 'linkSave', token: token,
@@ -372,18 +367,10 @@
               avatar: user.avatar || user.avatarSmall || '', trusted: true
             })
           });
-          var raw = await res.text();
-          var data = null;
-          try { data = JSON.parse(raw); } catch (e2) { }
-          if (data) {
-            if (msg) { msg.textContent = data.ok ? 'Готово! Вернитесь в лаунчер — вход выполнится автоматически.' : ((data.error) || 'Не удалось войти'); msg.classList.toggle('ok', !!data.ok); }
-            if (data.ok) btn.textContent = 'Вход выполнен ✓';
-          } else if (msg) {
-            msg.textContent = 'Сервер вернул ответ ' + res.status + ': ' + raw.slice(0, 80);
-          }
+          var data = await res.json();
+          if (msg) { msg.textContent = data && data.ok ? 'Вход в лаунчер выполнен. Вернитесь в лаунчер.' : ((data && data.error) || 'Не удалось войти'); msg.classList.toggle('ok', !!(data && data.ok)); }
         } catch (e) { if (msg) msg.textContent = 'Сайт недоступен: ' + (e && e.message ? e.message : 'нет связи'); }
-        btn.disabled = false;
-      });
+      })();
     })();
 
     // logout
