@@ -41,13 +41,39 @@ async function gemini(messages) {
     systemInstruction: sys ? { parts: [{ text: String(sys.content || '').slice(0, 8000) }] } : undefined,
     generationConfig: { maxOutputTokens: 900, temperature: 0.75 }
   }, 22000);
-  if (r.status !== 200) { global.__geminiErr = r.status + ': ' + String(r.body || '').slice(0, 400); return null; }
+  if (r.status !== 200) { return null; }
   try {
     const j = JSON.parse(r.body);
     const parts = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
     if (parts && parts.length) return parts.map(p => p.text || '').join('').trim();
   } catch (e) { }
   return null;
+}
+function getJson(url, timeout) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    const req = require('https').get(url, { timeout: timeout || 10000, headers: { 'User-Agent': 'NebulaAi/1.0' } }, (res) => {
+      let raw = ''; res.on('data', (c) => { raw += c; });
+      res.on('end', () => { try { finish(JSON.parse(raw)); } catch (e) { finish(null); } });
+    });
+    req.on('error', () => finish(null));
+    req.on('timeout', () => { try { req.destroy(); } catch (e) { } finish(null); });
+  });
+}
+async function searchWeb(q) {
+  const query = String(q || '').slice(0, 160);
+  const ddg = await getJson('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1', 9000);
+  const wiki = await getJson('https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(query) + '&format=json&srlimit=3&utf8=1', 9000);
+  const sources = [];
+  if (ddg && ddg.AbstractText) sources.push({ title: ddg.Heading || 'DuckDuckGo', url: ddg.AbstractURL || 'https://duckduckgo.com/?q=' + encodeURIComponent(query), snippet: String(ddg.AbstractText).slice(0, 600) });
+  (ddg && ddg.RelatedTopics || []).slice(0, 3).forEach(t => {
+    if (t.Text && t.FirstURL) sources.push({ title: String(t.Text).split(' - ')[0].slice(0, 90), url: t.FirstURL, snippet: String(t.Text).slice(0, 400) });
+  });
+  ((wiki && wiki.query && wiki.query.search) || []).slice(0, 3).forEach(h => {
+    sources.push({ title: String(h.title || '').slice(0, 90), url: 'https://ru.wikipedia.org/wiki/' + encodeURIComponent(String(h.title || '').replace(/ /g, '_')), snippet: String((h.snippet || '').replace(/<[^>]*>/g, '')).slice(0, 400) });
+  });
+  return sources;
 }
 async function pollinations(messages) {
   const r = await post('https://text.pollinations.ai/openai', {}, {
@@ -68,14 +94,22 @@ module.exports = async (req, res) => {
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { }
   const messages = Array.isArray(body.messages) ? body.messages : [];
   if (!messages.length) return json(res, 400, { ok: false, error: 'No messages' });
+  const lastUser = messages.slice().reverse().find(m => m && m.role === 'user');
+  const sources = await searchWeb(lastUser && lastUser.content || '');
+  const facts = sources.map(s => s.title + ': ' + s.snippet).join('\n');
+  if (facts) {
+    const sysIdx = messages.findIndex(m => m.role === 'system');
+    const addition = '\n\nОтвечай как умный поисковый ассистент: кратко, по фактам, без выдуманных имен. Используй свежие данные ниже. Если данных мало — скажи честно.\nДанные из интернета:\n' + facts.slice(0, 4000);
+    if (sysIdx >= 0) messages[sysIdx].content += addition;
+    else messages.unshift({ role: 'system', content: addition });
+  }
   const key = JSON.stringify(messages).slice(0, 8000);
   if (CACHE.has(key)) return json(res, 200, { ok: true, answer: CACHE.get(key), source: 'cache' });
 
-  let answer = await gemini(messages);
-  let source = 'gemini';
-  if (!answer) { answer = await pollinations(messages); source = 'pollinations'; }
+  let answer = await pollinations(messages);
+  let source = 'pollinations';
   if (!answer) return json(res, 502, { ok: false, error: 'AI unavailable' });
   CACHE.set(key, answer);
   if (CACHE.size > 200) CACHE.clear();
-  return json(res, 200, { ok: true, answer: answer, source: source, debug: body.debug ? (global.__geminiErr || '') : undefined });
+  return json(res, 200, { ok: true, answer: answer, source: source, sources: sources.slice(0, 4), debug: body.debug ? (global.__geminiErr || '') : undefined });
 };
