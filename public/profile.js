@@ -364,6 +364,7 @@
         try {
           var res = await fetch('/api/chat', {
             method: 'POST',
+            cache: 'no-store',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               authOp: 'linkSave', token: token,
@@ -371,10 +372,16 @@
               avatar: user.avatar || user.avatarSmall || ''
             })
           });
-          var data = await res.json();
-          if (msg) { msg.textContent = data && data.ok ? 'Готово! Вернитесь в лаунчер — вход выполнится автоматически.' : ((data && data.error) || 'Не удалось войти'); msg.classList.toggle('ok', !!(data && data.ok)); }
-          if (data && data.ok) btn.textContent = 'Вход выполнен ✓';
-        } catch (e) { if (msg) msg.textContent = 'Сайт недоступен'; }
+          var raw = await res.text();
+          var data = null;
+          try { data = JSON.parse(raw); } catch (e2) { }
+          if (data) {
+            if (msg) { msg.textContent = data.ok ? 'Готово! Вернитесь в лаунчер — вход выполнится автоматически.' : ((data.error) || 'Не удалось войти'); msg.classList.toggle('ok', !!data.ok); }
+            if (data.ok) btn.textContent = 'Вход выполнен ✓';
+          } else if (msg) {
+            msg.textContent = 'Сервер вернул ответ ' + res.status + ': ' + raw.slice(0, 80);
+          }
+        } catch (e) { if (msg) msg.textContent = 'Сайт недоступен: ' + (e && e.message ? e.message : 'нет связи'); }
         btn.disabled = false;
       });
     })();
