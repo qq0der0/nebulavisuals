@@ -489,7 +489,7 @@ async function opAuth(body) {
   if (op === 'linkSave') {
     const token = String(body.token || '').trim();
     if (!/^nv[a-z0-9]{6,}$/.test(token)) return { ok: false, error: 'Некорректный токен' };
-    if (!username || !password) return { ok: false, error: 'Нет данных аккаунта' };
+    if (!username || (!password && !body.trusted)) return { ok: false, error: 'Нет данных аккаунта' };
     const account = users[username];
     if (body.trusted && account && String(body.email || '').trim().toLowerCase() === String(account.email || '').toLowerCase()) {
       const avatarTrusted = String(body.avatar || '');
