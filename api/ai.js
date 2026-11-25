@@ -87,7 +87,7 @@ async function searchWeb(q) {
 async function kiloChat(messages, model) {
   const r = await post('https://ai-gateway.kilo.ai/api/v1/chat/completions', {}, {
     model: model || 'nvidia/nemotron-3-ultra-550b-a55b:free', messages: messages, max_tokens: 900, temperature: 0.7
-  }, 25000);
+  }, 14000);
   if (r.status !== 200) return null;
   try {
     const j = JSON.parse(r.body);
@@ -139,9 +139,9 @@ module.exports = async (req, res) => {
   const key = JSON.stringify(messages).slice(0, 8000);
   if (CACHE.has(key)) return json(res, 200, { ok: true, answer: CACHE.get(key), source: 'cache' });
 
-  let answer = await kiloChat(messages, 'nvidia/nemotron-3-ultra-550b-a55b:free');
-  let source = 'nemotron-550b';
-  if (!answer) { answer = await kiloChat(messages, 'baidu/ernie-5.5-flash-preview:free'); source = 'ernie-5.5'; }
+  let answer = await kiloChat(messages, 'baidu/ernie-5.5-flash-preview:free');
+  let source = 'ernie-5.5';
+  if (!answer) { answer = await kiloChat(messages, 'nvidia/nemotron-3-ultra-550b-a55b:free'); source = 'nemotron-550b'; }
   if (!answer) { answer = await ovhChat(messages, 'gpt-oss-120b'); source = 'ovh-120b'; }
   if (!answer) { answer = await ovhChat(messages, 'Meta-Llama-3_3-70B-Instruct'); source = 'ovh-llama'; }
   if (!answer) { answer = await pollinations(messages); source = 'pollinations'; }
