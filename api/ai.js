@@ -84,6 +84,17 @@ async function searchWeb(q) {
   });
   return sources;
 }
+async function ovhChat(messages) {
+  const r = await post('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions', {}, {
+    model: 'gpt-oss-120b', messages: messages, max_tokens: 900, temperature: 0.7
+  }, 18000);
+  if (r.status !== 200) return null;
+  try {
+    const j = JSON.parse(r.body);
+    const ans = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+    return ans ? String(ans).trim() : null;
+  } catch (e) { return null; }
+}
 async function pollinations(messages) {
   const r = await post('https://text.pollinations.ai/openai', {}, {
     model: 'openai', messages: messages, max_tokens: 700
@@ -115,8 +126,9 @@ module.exports = async (req, res) => {
   const key = JSON.stringify(messages).slice(0, 8000);
   if (CACHE.has(key)) return json(res, 200, { ok: true, answer: CACHE.get(key), source: 'cache' });
 
-  let answer = await pollinations(messages);
-  let source = 'pollinations';
+  let answer = await ovhChat(messages);
+  let source = 'ovh';
+  if (!answer) { answer = await pollinations(messages); source = 'pollinations'; }
   if (!answer) return json(res, 502, { ok: false, error: 'AI unavailable' });
   CACHE.set(key, answer);
   if (CACHE.size > 200) CACHE.clear();
