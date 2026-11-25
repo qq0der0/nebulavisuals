@@ -351,6 +351,34 @@
       toast('Пароль сохранён');
     });
 
+    //autologin в лаунчер через сайт
+    (function () {
+      var btn = document.getElementById('launcher-login-btn');
+      var msg = document.getElementById('launcher-login-msg');
+      var token = new URLSearchParams(window.location.search).get('launcher') || '';
+      if (!btn) return;
+      btn.addEventListener('click', async function () {
+        if (!token) { if (msg) msg.textContent = 'Нажмите «Войти через сайт» в лаунчере'; return; }
+        if (!user || !user.username) { if (msg) msg.textContent = 'Нет данных аккаунта'; return; }
+        btn.disabled = true;
+        try {
+          var res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              authOp: 'linkSave', token: token,
+              username: user.username, password: user.password || '',
+              avatar: user.avatar || user.avatarSmall || ''
+            })
+          });
+          var data = await res.json();
+          if (msg) { msg.textContent = data && data.ok ? 'Готово! Вернитесь в лаунчер — вход выполнится автоматически.' : ((data && data.error) || 'Не удалось войти'); msg.classList.toggle('ok', !!(data && data.ok)); }
+          if (data && data.ok) btn.textContent = 'Вход выполнен ✓';
+        } catch (e) { if (msg) msg.textContent = 'Сайт недоступен'; }
+        btn.disabled = false;
+      });
+    })();
+
     // logout
     const logout = document.getElementById('logout-btn');
     if (logout) logout.addEventListener('click', () => {
