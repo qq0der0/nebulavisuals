@@ -5,7 +5,10 @@ let lastPollinationsAt = 0;
 const LOCAL_FACTS = [
   'Nebula Visuals Beta is an Electron launcher for Minecraft 1.21.4 with Fabric.',
   'The Beta game directory is C:\\NebulaVisuals\\game\\Beta.',
-  'The launcher includes game, mods, assistant and settings areas.'
+  'The launcher includes game, mods, assistant and settings areas.',
+  'YouTube is a video-sharing platform: users upload, watch, like, comment on and subscribe to channels.',
+  'YouTube Shorts are short vertical videos; YouTube Music is a music streaming service; YouTube Premium removes ads and allows official offline downloads in the mobile app.',
+  'To find a video on YouTube, use the search bar and filters; to save it for later, use the Save/Watch later playlist or the official download feature where available.'
 ].join('\n');
 
 function json(res, code, obj) {
@@ -179,6 +182,8 @@ module.exports = async (req, res) => {
     role: m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
     content: String(m.content || '').slice(0, m.role === 'system' ? 8000 : 3000)
   }));
+  const baseSystem = safeMessages.find(m => m.role === 'system');
+  if (baseSystem) baseSystem.content += '\n\nСправочная информация (если релевантно вопросу): ' + LOCAL_FACTS;
   if (facts) {
     const system = safeMessages.find(m => m.role === 'system');
     const addition = '\n\nАктуальные найденные сведения (используй только релевантное, не выдумывай факты):\n' + facts;
