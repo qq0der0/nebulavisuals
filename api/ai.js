@@ -5,10 +5,7 @@ let lastPollinationsAt = 0;
 const LOCAL_FACTS = [
   'Nebula Visuals Beta is an Electron launcher for Minecraft 1.21.4 with Fabric.',
   'The Beta game directory is C:\\NebulaVisuals\\game\\Beta.',
-  'The launcher includes game, mods, assistant and settings areas.',
-  'YouTube is a video-sharing platform: users upload, watch, like, comment on and subscribe to channels.',
-  'YouTube Shorts are short vertical videos; YouTube Music is a music streaming service; YouTube Premium removes ads and allows official offline downloads in the mobile app.',
-  'To find a video on YouTube, use the search bar and filters; to save it for later, use the Save/Watch later playlist or the official download feature where available.'
+  'The launcher includes game, mods, assistant and settings areas.'
 ].join('\n');
 
 function json(res, code, obj) {
@@ -172,8 +169,14 @@ module.exports = async (req, res) => {
     return json(res, 200, { ok: true, answer: cachedEarly.answer, sources: cachedEarly.sources || [], source: 'cache' });
   }
   const lastUser = messages.slice().reverse().find(m => m && m.role === 'user');
+  const latestPrompt = String(lastUser && lastUser.content || '').toLowerCase();
+  const cheatIntent = /(сделай|напиши|создай|добавь|реализуй|запрограммируй|дай\s+код|как\s+сделать|как\s+написать|исходник\w*)[\s\S]{0,70}(kill\s*aura|killaura|auto\s*totem|autototem|auto\s*crystal|autocrystal|speedhack|flyhack|reach\s*hack|читерск\w*|чит\w*(?:\s+(для|на)\s*(minecraft|майнкрафт|funtime|фантайм|сервер))?|чит\w*\s+(функц|клиент|мод)|обход\w*\s+античит|эксплойт|эксплоит|дюп|dupe|краш\w*\s+сервер|бот\w*\s+(для|на)\s*(фарм|пвп|сервер)|макрос\w*\s+(для|на)\s*(авто|фарм|пвп))|\b(kill\s*aura|killaura|auto\s*totem|autototem|auto\s*crystal|autocrystal|speedhack|flyhack|reach\s*hack)\b/.test(latestPrompt);
+  if (cheatIntent) {
+    return json(res, 200, { ok: true, answer: 'С читами, обходом античита, эксплойтами и автоматизацией нечестной игры я не помогаю. 🙅\n\nМогу помочь с разрешёнными HUD/QoL-модами, оптимизацией FPS, честными PvP-механиками или диагностикой клиента.', sources: [], source: 'safety' });
+  }
   let sources = [], facts = '';
-  if (body.web && lastUser) {
+  const topicNeedsFreshInfo = !!(lastUser && /(funtime|фантайм|fun\s*time|youtube|ютуб|ютубер|блогер|правил\w*\s+сервер|команд\w*\s+сервер)/i.test(String(lastUser.content || '')));
+  if ((body.web || topicNeedsFreshInfo) && lastUser) {
     const found = await searchWeb(lastUser.content || '');
     sources = found.sources;
     facts = found.facts.join('\n').slice(0, 3500);
@@ -182,8 +185,16 @@ module.exports = async (req, res) => {
     role: m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
     content: String(m.content || '').slice(0, m.role === 'system' ? 8000 : 3000)
   }));
-  const baseSystem = safeMessages.find(m => m.role === 'system');
-  if (baseSystem) baseSystem.content += '\n\nСправочная информация (если релевантно вопросу): ' + LOCAL_FACTS;
+  const safetyAndDomain = [
+    'Ты — разговорный русскоязычный ИИ-ассистент в Electron-лаунчере. У тебя нет собственного имени.',
+    'Ты умеешь полноценно обсуждать YouTube: идеи роликов и Shorts, сценарии, названия, описания, теги, монтаж, превью, аналитику и продвижение.',
+    'Ты умеешь отвечать о Minecraft-сервере FunTime: режимы, экономика, торговля, кланы, приваты, PvP, правила и команды. Не выдумывай актуальные правила, команды, цены, вайпы, онлайн, владельцев и блогеров. При вопросах о текущем состоянии используй приложенные результаты поиска; если данных недостаточно, честно обозначь неопределённость и попроси уточнить режим/сервер.',
+    'Строго запрещено создавать код, инструкции, алгоритмы или функции читов (KillAura, Fly, Speed, Reach, AutoTotem, AutoCrystal и подобное), обходов античита, эксплойтов, дюпов, краша сервера, ботов и макросов для запрещённой автоматизации. На такие запросы вежливо откажи и предложи безопасные альтернативы: легальные HUD/QoL-моды, оптимизацию, тренировку PvP и диагностику клиента.',
+    'Разрешены обычные моды Fabric, косметические функции, HUD, карты, производительность и другие честные улучшения. Отвечай короткими абзацами, списками и уместными эмодзи.'
+  ].join('\n');
+  const systemMessage = safeMessages.find(m => m.role === 'system');
+  if (systemMessage) systemMessage.content = safetyAndDomain + '\n\n' + systemMessage.content;
+  else safeMessages.unshift({ role: 'system', content: safetyAndDomain });
   if (facts) {
     const system = safeMessages.find(m => m.role === 'system');
     const addition = '\n\nАктуальные найденные сведения (используй только релевантное, не выдумывай факты):\n' + facts;
