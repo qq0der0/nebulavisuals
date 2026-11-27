@@ -166,6 +166,19 @@ body:has(.shell) { min-height:100vh; }
 @media (prefers-reduced-motion:reduce) {
   html { scroll-behavior:auto; }
 }
+@media (max-width:360px) {
+  header.nav .nav-inner { width:calc(100% - 6px) !important; padding:5px 6px !important; gap:4px !important; min-height:46px !important; border-radius:14px !important; }
+  header.nav .brand-name { display:none !important; }
+  header.nav .brand-logo-icon { width:26px !important; height:26px !important; }
+  header.nav .nav-auth { height:32px !important; padding:0 9px !important; font-size:11.5px !important; }
+  header.nav .nav-tg { width:32px !important; height:32px !important; }
+  .shell { width:calc(100% - 10px) !important; margin:8px auto !important; }
+  .sidebar { padding:10px 10px !important; }
+  .main { padding:0 0 24px !important; }
+  .topbar { padding:12px !important; }
+  .page-title { font-size:16px !important; }
+  .panel { padding:12px 10px !important; border-radius:12px !important; }
+}
 </style>
 
 </head>
@@ -196,6 +209,9 @@ body:has(.shell) { min-height:100vh; }
         <div class="user-role" id="user-role">
           <img src="/role-user.svg" alt="" class="role-icon" id="role-icon">
           <span id="user-status">Пользователь</span>
+        </div>
+        <div class="user-rubles" title="Баланс наград">
+          💠 <b data-rubles>0</b> ₽ · Бета: <b data-beta-days>0</b> дн.
         </div>
       </div>
     </div>
@@ -229,8 +245,9 @@ body:has(.shell) { min-height:100vh; }
   <main class="main">
     <div class="topbar">
       <h1 class="page-title" id="page-title">Главная</h1>
-      <button class="nk-btn" id="nkKeyBtn" type="button" style="margin-left:auto;">Ввести ключ</button>
-      <a class="back-link" href="/index.html">На сайт →</a>
+      <button class="nk-btn js-rewards-open" id="profileRewardsBtn" type="button" style="margin-left:auto;">🎁 Награда</button>
+      <button class="nk-btn" id="nkKeyBtn" type="button" style="margin-left:8px;">Ввести ключ</button>
+      <a class="back-link" href="/index.html" style="margin-left:8px;">На сайт →</a>
     </div>
 
     <!-- HOME TAB -->
@@ -317,7 +334,8 @@ body:has(.shell) { min-height:100vh; }
     <section class="tab-content" id="tab-media">
       <div class="panel">
         <h3 class="panel-title">Медиа</h3>
-        <div style="text-align:center;padding:44px 12px;font-size:22px;font-weight:800;letter-spacing:2px;color:#c6a8ff;">soon...</div>
+        <p class="panel-desc">Свой промокод автора даёт −10%, но доступен только с бетой.</p>
+        <div class="nvr-promo-slot" data-rewards-promo></div>
       </div>
     </section>
 
@@ -335,6 +353,7 @@ body:has(.shell) { min-height:100vh; }
 
 <script src="/chat-backend.js"></script>
 <script src="/keys.js"></script>
+<script src="/rewards.js"></script>
 <script src="/profile.js"></script>
 </body>
 </html>

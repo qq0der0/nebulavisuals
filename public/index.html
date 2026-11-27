@@ -308,6 +308,22 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
   header.nav .nav-links a:nth-child(n+5) { display:none !important; }
   header.nav .nav-support-text { display:none !important; }
 }
+/* ===== 360px phones ===== */
+@media (max-width:360px) {
+  header.nav .nav-inner { width:calc(100% - 6px) !important; padding:5px 6px !important; gap:4px !important; min-height:46px !important; border-radius:14px !important; }
+  header.nav .brand { gap:5px !important; margin-right:2px !important; }
+  header.nav .brand-name { display:none !important; }
+  header.nav .brand-logo-icon { width:26px !important; height:26px !important; border-radius:8px !important; }
+  header.nav .nav-support { width:32px !important; height:32px !important; min-width:32px !important; }
+  header.nav .nav-tg { width:32px !important; height:32px !important; }
+  header.nav .nav-tg svg { width:20px !important; height:20px !important; }
+  header.nav .nav-auth { height:32px !important; padding:0 9px !important; font-size:11.5px !important; }
+  header.nav .nav-profile-link { padding:3px 5px 3px 3px !important; gap:5px !important; }
+  header.nav .nav-profile-name { display:none !important; }
+  header.nav .nav-profile-avatar { width:26px !important; height:26px !important; }
+  .hero-title { font-size:26px !important; }
+  .hero-inner { padding:0 !important; }
+}
 </style>
 
 </head>
@@ -344,8 +360,11 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
       <a href="#about">О нас</a>
       <a href="https://t.me/NebulaQuestionbot?start=question" target="_blank" rel="noopener">Задать вопрос</a>
     </nav>
-    <!-- Right side: Support + Telegram + Auth/Profile -->
+    <!-- Right side: Reward + Support + Telegram + Auth/Profile -->
     <div class="nav-right">
+      <button class="nav-reward js-rewards-open" id="nav-reward-btn" type="button" aria-label="Награда">
+        <span aria-hidden="true">🎁</span><span class="nav-reward-text">Награда</span>
+      </button>
       <a class="nav-support" href="https://funpay.com/users/16569412/" target="_blank" rel="noopener" aria-label="Поддержать автора на FunPay">
         <svg class="nav-support-heart" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <defs>
@@ -381,6 +400,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
           <img src="/avatar-nebula.png" alt="" class="nav-avatar-img" id="nav-avatar-img">
         </span>
         <span class="nav-profile-name" id="nav-profile-name">Профиль</span>
+        <span class="nav-rubles" title="Баланс рублей"><span aria-hidden="true">💠</span> <b data-rubles>0</b> ₽</span>
       </a>
       <!-- Бургер для телефонов/планшетов -->
       <button class="nav-burger" id="nav-burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav-mobile-menu">
@@ -397,6 +417,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
   <a href="#screens">Скриншоты</a>
   <a href="#about">О нас</a>
   <a href="https://t.me/NebulaQuestionbot?start=question" target="_blank" rel="noopener">Задать вопрос</a>
+  <button class="nav-m-reward js-rewards-open" type="button">🎁&nbsp;&nbsp;Награда</button>
   <a class="nav-m-support" href="https://funpay.com/users/16569412/" target="_blank" rel="noopener">♥&nbsp;&nbsp;Поддержать автора</a>
 </div>
 
@@ -553,6 +574,8 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
       </div>
       <div class="video-caption">Обзор на Nebula Visuals</div>
     </div>
+    <!-- Медиа: свой промокод (только с бетой) -->
+    <div class="nvr-promo-slot" data-rewards-promo></div>
   </section>
 
   <!-- ABOUT -->
@@ -750,6 +773,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
 
 <script src="/chat-backend.js"></script>
 <script src="/keys.js"></script>
+<script src="/rewards.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
