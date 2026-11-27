@@ -849,7 +849,7 @@
       const cls = isBot ? 'nick-bot' : nickClass(k, u ? u.email : '');
       // нет своей иконки → дефолтная иконка сайта (не буква)
       const src = o.a || DEFAULT_AVATAR;
-      const av = '<img src="' + src + '" alt="" class="online-avatar-img' + (isBot ? ' is-bot' : '') + '" onerror="this.style.display=\'none\'">';
+      const av = '';
       const tag = isBot ? '<span class="online-bot-tag">бот</span>' : (k === me ? '<span class="online-me-tag">вы</span>' : '');
       const liCls = [];
       if (k === me) liCls.push('is-me');
@@ -1017,7 +1017,7 @@
       const isBot = nick === BOT_NICK;
       // нет аватарки → показываем дефолтную иконку (бот — свою)
       const avSrc = m.a || (isBot ? BOT_AVATAR : DEFAULT_AVATAR);
-      const av = '<img src="' + avSrc + '" alt="" class="chat-avatar-img' + (isBot ? ' bot' : '') + '" onerror="this.style.display=\'none\'">';
+      const av = '';
       html += '<div class="chat-msg' + (isBot ? ' is-bot' : '') + '">' +
         '<div class="chat-avatar">' + av + '</div>' +
         '<div class="chat-body">' +

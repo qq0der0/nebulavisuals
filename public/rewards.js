@@ -170,7 +170,7 @@
 
   function renderBalances() {
     var betaEls = document.querySelectorAll('[data-beta-label]');
-    var betaText = state.betaForever ? 'навсегда 👑' : (state.betaDays > 0 ? state.betaDays + ' дн.' : 'нет');
+    var betaText = state.betaForever ? 'навсегда' : (state.betaDays > 0 ? state.betaDays + ' дн.' : 'нет');
     for (var j = 0; j < betaEls.length; j++) betaEls[j].textContent = betaText;
     var freeBtn = document.getElementById('nvrFreeBtn');
     if (freeBtn) {
@@ -193,7 +193,7 @@
     if (r.type === 'betaDays') return { icon: '🔷', value: r.days === 30 ? 'Бета: 1 месяц' : 'Бета: ' + r.days + ' дн.', desc: 'Дни беты добавлены' };
     if (r.type === 'color') return { icon: '🎨', value: 'Цвет ника', desc: 'Редкий цвет для чата' };
     if (r.type === 'config') return { icon: '⚙️', value: 'Конфиг', desc: 'Готовый конфиг (демо)' };
-    return { icon: '👑', value: 'Бета навсегда', desc: 'Мифическая карта' };
+    return { icon: '★', value: 'Бета навсегда', desc: 'Мифическая карта' };
   }
 
   function applyReward(r) {
