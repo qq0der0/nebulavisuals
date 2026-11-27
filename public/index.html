@@ -94,7 +94,7 @@ header.nav .nav-inner {
   backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
   display:flex !important; align-items:center !important; gap:22px !important;
 }
-header.nav .nav-links { flex:1 1 auto; justify-content:center !important; gap:clamp(10px,1.8vw,25px) !important; }
+header.nav .nav-links { flex:0 1 auto !important; justify-content:flex-start !important; gap:clamp(10px,1.8vw,25px) !important; margin-left:8px !important; }
 header.nav .nav-links a { transition:color .2s ease, opacity .2s ease; white-space:nowrap; }
 header.nav .nav-links a:hover { color:#c6a8ff !important; }
 header.nav .nav-right { gap:10px !important; }
@@ -580,6 +580,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
       
       <aside class="chat-rules-side" id="chat-rules">
         <div class="chat-rules-head">
+          <img src="/bot-avatar.jpg" alt="" class="chat-rules-avatar">
           <div>
             <div class="chat-rules-name">FilterBotByqqc0d</div>
             <div class="chat-rules-role">бот-модератор</div>
@@ -609,6 +610,7 @@ header.nav .nav-support-heart { width:20px !important; height:20px !important; }
         </div>
         <div class="chat-input-row" id="chat-input-row">
           <span class="chat-me" id="chat-me">
+            <img src="/avatar-nebula.png" alt="" class="chat-me-avatar" id="chat-me-avatar">
             <span class="chat-me-nick" id="chat-me-nick">—</span>
           </span>
           <input type="text" id="chat-text" placeholder="Напиши сообщение..." maxlength="300" autocomplete="off">
