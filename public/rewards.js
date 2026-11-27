@@ -141,7 +141,7 @@
       '<h2 class="nvr-title" id="nvrTitle">Награда</h2>' +
       '<p class="nvr-sub">Каждый день — 3 карты. Выбери любые 2, они перевернутся и начислят награду.</p>' +
       '<div class="nvr-balance">' +
-        '<div>Бета: <b data-beta-days>0</b> дн. <span id="nvrForever"></span></div>' +
+        '<div>Бета: <span data-beta-label>нет</span></div>' +
       '</div>' +
       '<div class="nvr-cards" id="nvrCards"><div class="nvr-empty">Нажми «Открыть 3 карты», затем выбери 2 из них.</div></div>' +
       '<div class="nvr-actions">' +
@@ -169,10 +169,9 @@
   }
 
   function renderBalances() {
-    var betaEls = document.querySelectorAll('[data-beta-days]');
-    for (var j = 0; j < betaEls.length; j++) betaEls[j].textContent = String(state.betaDays);
-    var forever = document.getElementById('nvrForever');
-    if (forever) forever.textContent = state.betaForever ? '· навсегда 👑' : '';
+    var betaEls = document.querySelectorAll('[data-beta-label]');
+    var betaText = state.betaForever ? 'навсегда 👑' : (state.betaDays > 0 ? state.betaDays + ' дн.' : 'нет');
+    for (var j = 0; j < betaEls.length; j++) betaEls[j].textContent = betaText;
     var freeBtn = document.getElementById('nvrFreeBtn');
     if (freeBtn) {
       dailyClaimed = lsGet(FREE_KEY) === dateStr();
